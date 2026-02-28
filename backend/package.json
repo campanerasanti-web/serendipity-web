@@ -1,0 +1,26 @@
+{
+  "name": "anthropos-backend",
+  "version": "1.0.0",
+  "description": "API de inteligencia y datos para Anthropos OS",
+  "main": "api-server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx api-server.ts",
+    "dev": "tsx watch api-server.ts"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.0.2",
+    "cors": "^2.8.6",
+    "path": "^0.12.7",
+    "fs": "0.0.1-security"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,26 +1,162 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #09090b;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #09090b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #dc2626;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: rgba(37, 99, 235, 0.5);
+  --radius: 14px;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+
+  /* Climate Tokens - Default (Siembra) */
+  --climate-primary: #2563eb;
+  --climate-glow: rgba(37, 99, 235, 0.08);
+  --climate-border: #e4e4e7;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Climate: COSECHA */
+[data-climate='COSECHA'] {
+  --climate-primary: #2563eb;
+  --climate-glow: rgba(37, 99, 235, 0.1);
+  --climate-border: rgba(37, 99, 235, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Climate: SIEMBRA */
+[data-climate='SIEMBRA'] {
+  --climate-primary: #2563eb;
+  --climate-glow: rgba(37, 99, 235, 0.08);
+  --climate-border: rgba(37, 99, 235, 0.2);
+}
+
+/* Climate: TORMENTA */
+[data-climate='TORMENTA'] {
+  --climate-primary: #dc2626;
+  --climate-glow: rgba(220, 38, 38, 0.1);
+  --climate-border: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme='dark'] {
+  --background: #000000;
+  --foreground: #f4f4f5;
+  --secondary: #09090b;
+  --secondary-foreground: #f4f4f5;
+  --muted: #09090b;
+  --muted-foreground: #a1a1aa;
+  --card: #09090b;
+  --card-foreground: #f4f4f5;
+  --border: #27272a;
+  --input: #27272a;
+}
+
+[data-theme='dark'][data-climate='COSECHA'] {
+  --climate-border: rgba(37, 99, 235, 0.25);
+}
+
+[data-theme='dark'][data-climate='TORMENTA'] {
+  --climate-border: rgba(239, 68, 68, 0.35);
+}
+
+@layer base {
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    background-image: radial-gradient(circle at 50% -20%, var(--climate-glow), transparent 40%);
+    background-attachment: fixed;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 400;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Premium Utilities */
+.apple-blur {
+  backdrop-filter: saturate(180%) blur(15px);
+  background-color: color-mix(in srgb, var(--background), transparent 25%);
+  will-change: backdrop-filter;
+}
+
+.premium-shadow {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .premium-shadow {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.subtle-ring {
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(142, 142, 147, 0.3);
+  border-radius: 10px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(142, 142, 147, 0.2);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+@keyframes breathing {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px var(--climate-glow);
+    border-color: var(--climate-border);
+  }
+
+  50% {
+    transform: scale(1.002);
+    box-shadow: 0 0 25px var(--climate-glow);
+    border-color: var(--climate-primary);
+  }
+}
+
+.animate-breathing {
+  animation: breathing 4s ease-in-out infinite;
+  will-change: transform, box-shadow, border-color;
+}
+
+/* Smooth Transitions - Speed up for snapier feel */
+.transition-all {
+  transition-duration: 200ms !important;
 }
