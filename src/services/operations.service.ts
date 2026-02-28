@@ -1,5 +1,4 @@
 import { Order, OperationSummary } from '@/types/operations'
-import { apiClient } from '@/lib/api-client'
 
 // MOCK DATA for Phase 2 implementation
 // Initial data for the system
