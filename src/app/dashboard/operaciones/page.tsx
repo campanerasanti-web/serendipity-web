@@ -79,7 +79,7 @@ export default function OperacionesPage() {
                     <p className="text-[var(--muted-foreground)] text-lg font-medium transition-colors">{t('operations.subtitle')}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-                    <div className="flex bg-[var(--secondary)]/50 p-1.5 rounded-full border border-[var(--border)] overflow-hidden">
+                    <div className="flex bg-[var(--secondary)]/50 p-1.5 rounded-full border border-[var(--border)] overflow-x-auto scrollbar-hide max-w-full sm:max-w-none">
                         {(['all', 'green', 'amber', 'red'] as const).map((f) => (
                             <button
                                 key={f}

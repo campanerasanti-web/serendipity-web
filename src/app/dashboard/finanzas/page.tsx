@@ -74,7 +74,7 @@ export default function FinanzasPage() {
                     </div>
 
                     <div className="relative z-10 space-y-4">
-                        <div className="flex justify-between items-end">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
                             <p className="text-4xl font-bold text-[var(--foreground)] tracking-tighter">${finData.reserveFund.toLocaleString()}</p>
                             <p className="text-sm font-bold text-[var(--muted-foreground)] uppercase tracking-widest">{t('finances.target')}: ${finData.reserveTarget.toLocaleString()}</p>
                         </div>

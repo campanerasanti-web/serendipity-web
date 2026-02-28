@@ -83,8 +83,8 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--background)] transition-colors duration-500 p-4 font-sans relative">
-            {/* Controls Overlay */}
-            <div className="absolute top-8 right-8 flex items-center gap-3">
+            {/* Controls Overlay - Positioned better for mobile */}
+            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2 sm:gap-3 z-50">
                 <div className="relative">
                     <Button
                         variant="ghost"
@@ -116,7 +116,7 @@ export default function LoginPage() {
                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    className="absolute right-0 mt-4 w-56 bg-[var(--card)] border border-[var(--border)] rounded-[20px] shadow-2xl z-50 overflow-hidden p-1.5"
+                                    className="absolute right-0 sm:right-0 mt-4 w-56 bg-[var(--card)] border border-[var(--border)] rounded-[20px] shadow-2xl z-50 overflow-hidden p-1.5"
                                 >
                                     <div className="space-y-1">
                                         {languages.map((lang) => (
@@ -162,7 +162,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-[440px]"
             >
-                <Card className="p-10 !rounded-[32px] overflow-hidden relative shadow-2xl bg-[var(--card)] border-[var(--border)]">
+                <Card className="p-6 sm:p-10 !rounded-[24px] sm:!rounded-[32px] overflow-hidden relative shadow-2xl bg-[var(--card)] border-[var(--border)]">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-blue-400 to-red-500" />
 
                     <div className="text-center mb-10">

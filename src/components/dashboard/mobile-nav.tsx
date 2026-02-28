@@ -47,7 +47,9 @@ export function MobileNav({ filteredMenu }: MobileNavProps) {
                                 "text-[9px] font-bold uppercase tracking-tighter transition-opacity truncate w-full text-center px-1",
                                 isActive ? "opacity-100" : "opacity-60"
                             )}>
-                                {item.name.split(' ')[0]}
+                                {item.name.startsWith('EL ') || item.name.startsWith('LA ') || item.name.startsWith('THE ')
+                                    ? item.name.split(' ')[1]
+                                    : item.name.split(' ')[0]}
                             </span>
                             {isActive && (
                                 <motion.div
