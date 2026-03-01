@@ -75,9 +75,9 @@ export default function RegisterPage() {
     const currentLang = languages.find(l => l.code === language) || languages[0]
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] transition-colors duration-500 p-4 font-sans relative">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] transition-colors duration-500 p-4 pt-24 sm:pt-4 font-sans relative">
             {/* Controls Overlay - Positioned better for mobile */}
-            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2 sm:gap-3 z-50">
+            <div className="absolute top-6 right-4 sm:top-8 sm:right-8 flex items-center gap-2 sm:gap-3 z-50">
                 <div className="relative">
                     <Button
                         variant="ghost"

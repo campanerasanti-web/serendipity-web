@@ -177,8 +177,13 @@ export default function ConfiguracionPage() {
                     )}
 
                     <section className="pt-10 border-t border-[var(--border)] flex flex-col sm:flex-row justify-end gap-4">
-                        <Button variant="ghost" className="px-8 font-bold text-[var(--muted-foreground)] w-full sm:w-auto hover:text-[var(--foreground)]">{t('temple.reset')}</Button>
-                        <Button className="px-12 h-14 !rounded-[18px] shadow-lg text-base w-full sm:w-auto">{t('temple.update')} {tabs.find(t_ => t_.id === activeTab)?.n}</Button>
+                        <Button variant="ghost" className="px-8 font-bold text-[var(--muted-foreground)] w-full sm:w-auto h-12 sm:h-auto hover:text-[var(--foreground)]">{t('temple.reset')}</Button>
+                        <Button className="px-6 sm:px-12 py-4 min-h-[56px] h-auto !rounded-[18px] shadow-lg text-sm sm:text-base w-full sm:w-auto flex-col sm:flex-row items-center justify-center text-center">
+                            <span>{t('temple.update')}</span>
+                            <span className="sm:ml-1 text-[10px] sm:text-inherit opacity-80 sm:opacity-100 uppercase sm:normal-case font-black sm:font-bold">
+                                {tabs.find(t_ => t_.id === activeTab)?.n}
+                            </span>
+                        </Button>
                     </section>
                 </Card>
             </div>
