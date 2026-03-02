@@ -4,35 +4,22 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth, UserRole } from '@/context/auth-context'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, Lock, User, ChevronDown, ArrowRight, Sun, Moon } from 'lucide-react'
+import { Shield, Lock, User, ChevronDown, ArrowRight, ChevronLeft } from 'lucide-react'
 import { Button, Card, Input } from '@/components/ui-library'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useTranslation } from '@/context/language-context'
+import { AuthControls } from '@/components/auth-controls'
 
 export default function LoginPage() {
     const { login, loading } = useAuth()
-    const { t, language, setLanguage } = useTranslation()
+    const { t, language } = useTranslation()
     const router = useRouter()
     const [identity, setIdentity] = useState('')
     const [password, setPassword] = useState('')
     const [authority, setAuthority] = useState<UserRole>('ADMIN')
     const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-    const [isDarkMode, setIsDarkMode] = useState(false)
-    const [isLangOpen, setIsLangOpen] = useState(false)
-
-    // Sync with system or document level theme
-    useEffect(() => {
-        const theme = document.documentElement.getAttribute('data-theme')
-        setIsDarkMode(theme === 'dark')
-    }, [])
-
-    const toggleTheme = () => {
-        const next = !isDarkMode
-        setIsDarkMode(next)
-        document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light')
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -49,111 +36,26 @@ export default function LoginPage() {
         }
     }
 
-    const SpainFlag = () => (
-        <svg viewBox="0 0 512 512" className="w-full h-full">
-            <path fill="#AA151B" d="M0 0h512v128H0zM0 384h512v128H0z" />
-            <path fill="#F1BF00" d="M0 128h512v256H0z" />
-            <circle cx="150" cy="256" r="40" fill="#AA151B" opacity="0.2" />
-        </svg>
-    )
-
-    const USAFlag = () => (
-        <svg viewBox="0 0 512 512" className="w-full h-full">
-            <path fill="#FFF" d="M0 0h512v512H0z" />
-            <path fill="#B22234" d="M0 0h512v39H0zm0 78h512v39H0zm0 79h512v39H0zm0 79h512v39H0zm0 78h512v39H0zm0 79h512v39H0zm0 79h512v39H0z" />
-            <path fill="#3C3B6E" d="M0 0h204v274H0z" />
-            <circle cx="102" cy="137" r="40" fill="#FFF" opacity="0.4" />
-        </svg>
-    )
-
-    const VietnamFlag = () => (
-        <svg viewBox="0 0 512 512" className="w-full h-full">
-            <path fill="#da251d" d="M0 0h512v512H0z" />
-            <path fill="#ffff00" d="M256 100l27.1 83.5H371l-71.1 51.6 27.1 83.5-71-51.6-71 51.6 27.2-83.5-71.1-51.6h87.9z" />
-        </svg>
-    )
-
-    const languages = [
-        { code: 'es', label: 'ES', flag: SpainFlag },
-        { code: 'en', label: 'EN', flag: USAFlag },
-        { code: 'vn', label: 'VN', flag: VietnamFlag },
-    ]
-
-    const currentLang = languages.find(l => l.code === language) || languages[0]
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--background)] transition-colors duration-500 p-4 pt-24 sm:pt-4 font-sans relative">
-            {/* Controls Overlay - Positioned better for mobile */}
-            <div className="absolute top-6 right-4 sm:top-8 sm:right-8 flex items-center gap-2 sm:gap-3 z-50">
-                <div className="relative">
+
+            {/* ← Volver a landing */}
+            <div className="absolute top-6 left-4 sm:top-8 sm:left-8 z-50">
+                <Link href="/landing">
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setIsLangOpen(!isLangOpen)}
-                        className="!rounded-2xl border border-[var(--border)] shadow-sm bg-[var(--card)] px-4 text-[11px] font-bold uppercase tracking-[0.2em] h-10 flex gap-3 items-center hover:bg-[var(--secondary)] transition-all group overflow-hidden text-[var(--foreground)]"
+                        className="!rounded-2xl border border-[var(--border)] shadow-sm bg-[var(--card)] px-4 text-[11px] font-bold uppercase tracking-[0.2em] h-10 flex gap-2 items-center hover:bg-[var(--secondary)] transition-all text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                     >
-                        <div className="relative w-5 h-5 flex items-center justify-center overflow-hidden rounded-full border border-white/20 shadow-sm shrink-0">
-                            <AnimatePresence mode="wait" initial={false}>
-                                <motion.div
-                                    key={currentLang.code}
-                                    initial={{ y: 15, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -15, opacity: 0 }}
-                                    className="absolute inset-0"
-                                >
-                                    <currentLang.flag />
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                        <span>{currentLang.label}</span>
+                        <ChevronLeft size={14} /> Inicio
                     </Button>
+                </Link>
+            </div>
 
-                    <AnimatePresence>
-                        {isLangOpen && (
-                            <>
-                                <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    className="absolute right-0 sm:right-0 mt-4 w-56 bg-[var(--card)] border border-[var(--border)] rounded-[20px] shadow-2xl z-50 overflow-hidden p-1.5"
-                                >
-                                    <div className="space-y-1">
-                                        {languages.map((lang) => (
-                                            <button
-                                                key={lang.code}
-                                                onClick={() => {
-                                                    setLanguage(lang.code as any)
-                                                    setIsLangOpen(false)
-                                                }}
-                                                className={cn(
-                                                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[11px] font-bold uppercase tracking-wider transition-all",
-                                                    language === lang.code
-                                                        ? "bg-[var(--secondary)] text-[var(--foreground)]"
-                                                        : "text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]"
-                                                )}
-                                            >
-                                                <div className="w-5 h-5 rounded-full overflow-hidden border border-[var(--border)] shadow-sm">
-                                                    <lang.flag />
-                                                </div>
-                                                {lang.label} - {lang.code === 'es' ? 'Español' : lang.code === 'en' ? 'English' : 'Tiếng Việt'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            </>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleTheme}
-                    className="!rounded-full border border-[var(--border)] shadow-sm bg-[var(--card)] w-10 h-10 text-[var(--foreground)] hover:bg-[var(--secondary)] transition-all"
-                >
-                    {isDarkMode ? <Sun size={18} className="text-blue-500" /> : <Moon size={18} />}
-                </Button>
+            {/* Controls Overlay */}
+            <div className="absolute top-6 right-4 sm:top-8 sm:right-8 z-50">
+                <AuthControls />
             </div>
 
             <motion.div
