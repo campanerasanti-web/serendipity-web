@@ -490,10 +490,10 @@ export default function OperacionesPage() {
                             initial={{ scale: 0.95, y: 10 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 10 }}
-                            className="bg-[var(--card)] p-6 pt-16 sm:p-8 sm:pt-16 rounded-[32px] border border-[var(--border)] shadow-xl max-w-lg w-full relative max-h-[90vh] overflow-y-auto custom-scrollbar print:max-w-full print:max-h-none print:overflow-visible print:border-none print:shadow-none"
+                            className="bg-[var(--card)] rounded-[32px] border border-[var(--border)] shadow-xl max-w-lg w-full relative max-h-[90vh] flex flex-col overflow-hidden print:max-w-full print:max-h-none print:overflow-visible print:border-none print:shadow-none"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="absolute top-4 right-4 flex gap-1 print-hide z-10 bg-[var(--card)]/80 backdrop-blur-sm rounded-full p-1">
+                            <div className="absolute top-4 right-4 flex gap-1 print-hide z-10 bg-[var(--card)]/80 backdrop-blur-sm rounded-full p-1 shadow-sm border border-[var(--border)]">
                                 <button
                                     onClick={() => window.print()}
                                     className="p-2 rounded-full hover:bg-[var(--secondary)] text-[var(--muted-foreground)] hover:text-blue-500 transition-colors"
@@ -510,87 +510,89 @@ export default function OperacionesPage() {
                                 </button>
                             </div>
 
-                            <div className="flex flex-col items-center mb-8 text-center mt-2">
-                                <div className="bg-white p-5 sm:p-6 rounded-[32px] shadow-sm border border-[var(--border)] mb-6 print:border-none print:shadow-none print:p-0 print:mb-8">
-                                    <QRCodeCanvas
-                                        value={selectedOrderDetails.id}
-                                        size={200}
-                                        level="H"
-                                        includeMargin={false}
-                                        className="mx-auto print:!w-[400px] print:!h-[400px] sm:!w-[220px] sm:!h-[220px]"
-                                    />
-                                    <p className="text-[12px] font-bold text-black uppercase tracking-[0.3em] mt-5 print:text-[16px] print:tracking-[0.2em] break-all max-w-[280px] print:max-w-[400px] mx-auto print:mt-6">
-                                        {selectedOrderDetails.id}
-                                    </p>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <p className="text-[14px] font-bold text-blue-500 uppercase tracking-widest mb-2 print:text-black">
-                                        Serendipity OS
-                                    </p>
-                                    <h3 className="text-3xl font-bold text-[var(--foreground)] tracking-tight print:text-black print:text-5xl">
-                                        {selectedOrderDetails.customer}
-                                    </h3>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                {/* Info Grid */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
-                                        <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Producto</p>
-                                        <p className="text-sm font-semibold text-[var(--foreground)] truncate print:text-black">{selectedOrderDetails.product}</p>
+                            <div className="p-6 pt-16 sm:p-8 sm:pt-16 overflow-y-auto custom-scrollbar h-full print:p-0">
+                                <div className="flex flex-col items-center mb-8 text-center mt-2">
+                                    <div className="bg-white p-5 sm:p-6 rounded-[32px] shadow-sm border border-[var(--border)] mb-6 print:border-none print:shadow-none print:p-0 print:mb-8">
+                                        <QRCodeCanvas
+                                            value={selectedOrderDetails.id}
+                                            size={200}
+                                            level="H"
+                                            includeMargin={false}
+                                            className="mx-auto print:!w-[400px] print:!h-[400px] sm:!w-[220px] sm:!h-[220px]"
+                                        />
+                                        <p className="text-[12px] font-bold text-black uppercase tracking-[0.3em] mt-5 print:text-[16px] print:tracking-[0.2em] break-all max-w-[280px] print:max-w-[400px] mx-auto print:mt-6">
+                                            {selectedOrderDetails.id}
+                                        </p>
                                     </div>
-                                    <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
-                                        <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Volumen</p>
-                                        <p className="text-sm font-semibold text-[var(--foreground)] print:text-black">{selectedOrderDetails.quantity} {selectedOrderDetails.unit}</p>
-                                    </div>
-                                    <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
-                                        <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Estación Activa</p>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500 print:bg-black" />
-                                            <p className="text-sm font-semibold text-[var(--foreground)] truncate print:text-black">{getStationById(selectedOrderDetails.currentStationId)?.name || selectedOrderDetails.currentStationId}</p>
-                                        </div>
-                                    </div>
-                                    <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
-                                        <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Estado</p>
-                                        <Badge
-                                            className={cn(
-                                                "px-2 py-0.5 rounded-[6px] text-[10px] font-bold border-none print:bg-gray-200 print:text-black",
-                                                selectedOrderDetails.status === 'green' ? "bg-emerald-500/10 text-emerald-500" :
-                                                    selectedOrderDetails.status === 'amber' ? "bg-amber-500/10 text-amber-500" :
-                                                        "bg-red-500/10 text-red-500"
-                                            )}
-                                        >
-                                            {selectedOrderDetails.status === 'green' ? t('operations.optimized') : selectedOrderDetails.status === 'amber' ? t('operations.transition') : t('operations.delayed')}
-                                        </Badge>
+                                    <div className="flex flex-col items-center">
+                                        <p className="text-[14px] font-bold text-blue-500 uppercase tracking-widest mb-2 print:text-black">
+                                            Serendipity OS
+                                        </p>
+                                        <h3 className="text-3xl font-bold text-[var(--foreground)] tracking-tight print:text-black print:text-5xl">
+                                            {selectedOrderDetails.customer}
+                                        </h3>
                                     </div>
                                 </div>
 
-                                {/* Trazabilidad rápida */}
-                                {selectedOrderDetails.stationHistory && selectedOrderDetails.stationHistory.length > 0 && (
-                                    <div className="pt-2">
-                                        <h4 className="text-[13px] font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2 print:text-black">
-                                            <Activity size={16} />
-                                            {language === 'es' ? 'Trazabilidad Física' : 'Physical Traceability'}
-                                        </h4>
-                                        <div className="space-y-3">
-                                            {selectedOrderDetails.stationHistory.slice(-3).reverse().map((hist: any, idx: number) => (
-                                                <div key={idx} className="flex gap-4">
-                                                    <div className="flex flex-col items-center">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500/50 mt-1 print:bg-gray-400" />
-                                                        {idx !== Math.min(selectedOrderDetails.stationHistory.length, 3) - 1 && (
-                                                            <div className="w-[1px] h-full bg-[var(--border)] my-1 print:bg-gray-300" />
-                                                        )}
-                                                    </div>
-                                                    <div className="pb-3 text-sm">
-                                                        <p className="font-semibold text-[var(--foreground)] print:text-black">{getStationById(hist.stationId)?.name || hist.stationId}</p>
-                                                        <p className="text-[12px] text-[var(--muted-foreground)] print:text-gray-600">Ingreso: {new Date(hist.enteredAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                <div className="space-y-6">
+                                    {/* Info Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
+                                            <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Producto</p>
+                                            <p className="text-sm font-semibold text-[var(--foreground)] truncate print:text-black">{selectedOrderDetails.product}</p>
+                                        </div>
+                                        <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
+                                            <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Volumen</p>
+                                            <p className="text-sm font-semibold text-[var(--foreground)] print:text-black">{selectedOrderDetails.quantity} {selectedOrderDetails.unit}</p>
+                                        </div>
+                                        <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
+                                            <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Estación Activa</p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-blue-500 print:bg-black" />
+                                                <p className="text-sm font-semibold text-[var(--foreground)] truncate print:text-black">{getStationById(selectedOrderDetails.currentStationId)?.name || selectedOrderDetails.currentStationId}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-[var(--background)] p-4 rounded-[20px] border border-[var(--border)]">
+                                            <p className="text-[11px] font-semibold text-[var(--muted-foreground)] uppercase tracking-wider mb-1">Estado</p>
+                                            <Badge
+                                                className={cn(
+                                                    "px-2 py-0.5 rounded-[6px] text-[10px] font-bold border-none print:bg-gray-200 print:text-black",
+                                                    selectedOrderDetails.status === 'green' ? "bg-emerald-500/10 text-emerald-500" :
+                                                        selectedOrderDetails.status === 'amber' ? "bg-amber-500/10 text-amber-500" :
+                                                            "bg-red-500/10 text-red-500"
+                                                )}
+                                            >
+                                                {selectedOrderDetails.status === 'green' ? t('operations.optimized') : selectedOrderDetails.status === 'amber' ? t('operations.transition') : t('operations.delayed')}
+                                            </Badge>
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Trazabilidad rápida */}
+                                    {selectedOrderDetails.stationHistory && selectedOrderDetails.stationHistory.length > 0 && (
+                                        <div className="pt-2">
+                                            <h4 className="text-[13px] font-semibold text-[var(--foreground)] mb-4 flex items-center gap-2 print:text-black">
+                                                <Activity size={16} />
+                                                {language === 'es' ? 'Trazabilidad Física' : 'Physical Traceability'}
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {selectedOrderDetails.stationHistory.slice(-3).reverse().map((hist: any, idx: number) => (
+                                                    <div key={idx} className="flex gap-4">
+                                                        <div className="flex flex-col items-center">
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-blue-500/50 mt-1 print:bg-gray-400" />
+                                                            {idx !== Math.min(selectedOrderDetails.stationHistory.length, 3) - 1 && (
+                                                                <div className="w-[1px] h-full bg-[var(--border)] my-1 print:bg-gray-300" />
+                                                            )}
+                                                        </div>
+                                                        <div className="pb-3 text-sm">
+                                                            <p className="font-semibold text-[var(--foreground)] print:text-black">{getStationById(hist.stationId)?.name || hist.stationId}</p>
+                                                            <p className="text-[12px] text-[var(--muted-foreground)] print:text-gray-600">Ingreso: {new Date(hist.enteredAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>
