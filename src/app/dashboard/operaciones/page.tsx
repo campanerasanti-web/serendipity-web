@@ -490,10 +490,10 @@ export default function OperacionesPage() {
                             initial={{ scale: 0.95, y: 10 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 10 }}
-                            className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-lg w-full relative max-h-[90vh] overflow-y-auto custom-scrollbar print:max-w-full print:max-h-none print:overflow-visible print:border-none print:shadow-none"
+                            className="bg-[var(--card)] p-6 pt-16 sm:p-8 sm:pt-16 rounded-[32px] border border-[var(--border)] shadow-xl max-w-lg w-full relative max-h-[90vh] overflow-y-auto custom-scrollbar print:max-w-full print:max-h-none print:overflow-visible print:border-none print:shadow-none"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="absolute top-6 right-6 flex gap-2 print-hide">
+                            <div className="absolute top-4 right-4 flex gap-1 print-hide z-10 bg-[var(--card)]/80 backdrop-blur-sm rounded-full p-1">
                                 <button
                                     onClick={() => window.print()}
                                     className="p-2 rounded-full hover:bg-[var(--secondary)] text-[var(--muted-foreground)] hover:text-blue-500 transition-colors"
@@ -510,14 +510,14 @@ export default function OperacionesPage() {
                                 </button>
                             </div>
 
-                            <div className="flex flex-col items-center mb-10 text-center">
-                                <div className="bg-white p-6 rounded-[32px] shadow-sm border border-[var(--border)] mb-6 print:border-none print:shadow-none print:p-0 print:mb-8">
+                            <div className="flex flex-col items-center mb-8 text-center mt-2">
+                                <div className="bg-white p-5 sm:p-6 rounded-[32px] shadow-sm border border-[var(--border)] mb-6 print:border-none print:shadow-none print:p-0 print:mb-8">
                                     <QRCodeCanvas
                                         value={selectedOrderDetails.id}
-                                        size={220}
+                                        size={200}
                                         level="H"
                                         includeMargin={false}
-                                        className="mx-auto print:!w-[400px] print:!h-[400px]"
+                                        className="mx-auto print:!w-[400px] print:!h-[400px] sm:!w-[220px] sm:!h-[220px]"
                                     />
                                     <p className="text-[12px] font-bold text-black uppercase tracking-[0.3em] mt-5 print:text-[16px] print:tracking-[0.2em] break-all max-w-[280px] print:max-w-[400px] mx-auto print:mt-6">
                                         {selectedOrderDetails.id}

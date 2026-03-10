@@ -79,7 +79,7 @@ export function Sidebar({ isOpen, isDesktop, setOpen, menuItems }: SidebarProps)
                                 className={cn(
                                     "flex items-center gap-4 p-3 rounded-[14px] transition-all group relative",
                                     isActive
-                                        ? "bg-[var(--climate-primary)] text-white shadow-lg shadow-[var(--climate-glow)]"
+                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
                                         : "text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]",
                                     isCompact && "justify-center"
                                 )}
