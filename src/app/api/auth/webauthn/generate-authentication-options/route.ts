@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { createClient } from '@supabase/supabase-js';
 
-const rpID = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_URL?.replace(/^https?:\/\//, '') || 'localhost' : 'localhost';
-
 export async function POST(req: Request) {
     try {
+        const url = new URL(req.url);
+        const rpID = url.hostname;
         const body = await req.json().catch(() => ({}));
 
         // We can pass user email to restrict matching to their credentials

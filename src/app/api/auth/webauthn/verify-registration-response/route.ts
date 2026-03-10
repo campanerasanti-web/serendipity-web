@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import { createClient } from '@supabase/supabase-js';
 
-const rpID = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_URL?.replace(/^https?:\/\//, '') || 'localhost' : 'localhost';
-const expectedOrigin = process.env.NODE_ENV === 'production' ? [process.env.NEXT_PUBLIC_URL || `https://${rpID}`] : ['http://localhost:3000', 'http://192.168.1.X:3000']; // You can add local IP for testing.
-
 export async function POST(req: Request) {
     try {
+        const url = new URL(req.url);
+        const rpID = url.hostname;
+        const expectedOrigin = url.origin;
+
         const body = await req.json();
 
         const authHeader = req.headers.get('Authorization');
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
         const verification = await verifyRegistrationResponse({
             response: body,
             expectedChallenge,
-            expectedOrigin: expectedOrigin,
+            expectedOrigin,
             expectedRPID: rpID,
         });
 

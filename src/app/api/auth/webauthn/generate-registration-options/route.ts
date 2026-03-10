@@ -3,11 +3,12 @@ import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { createClient } from '@supabase/supabase-js';
 
 const rpName = 'Serendipity OS';
-const rpID = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_URL?.replace(/^https?:\/\//, '') || 'localhost' : 'localhost';
-const origin = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_URL || 'https://' + rpID : 'http://localhost:3000';
 
 export async function POST(req: Request) {
     try {
+        const url = new URL(req.url);
+        const rpID = url.hostname;
+
         const authHeader = req.headers.get('Authorization');
         if (!authHeader) {
             return NextResponse.json({ error: 'No authorization header' }, { status: 401 });
