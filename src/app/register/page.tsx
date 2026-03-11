@@ -1,19 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, UserRole } from '@/context/auth-context'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UserPlus, ArrowRight, ChevronDown, Mail, User, Shield, ChevronLeft, Lock, Eye, EyeOff } from 'lucide-react'
-import { Button, Card, Input } from '@/components/ui-library'
+import { UserPlus, ArrowRight, ChevronDown, Mail, User, Shield, ChevronLeft, Lock, Eye, EyeOff, RefreshCcw } from 'lucide-react'
+import { Button, Input } from '@/components/ui-library'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useTranslation } from '@/context/language-context'
 import { AuthControls } from '@/components/auth-controls'
 import { useNotifications } from '@/context/notification-context'
 
-export default function RegisterPage() {
-    const { t, language } = useTranslation()
+function RegisterForm() {
+    const { t } = useTranslation()
+    const searchParams = useSearchParams()
+    const isAdminMode = searchParams.get('admin') === 'true'
+    
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
@@ -26,6 +29,13 @@ export default function RegisterPage() {
     const router = useRouter()
 
     const { addNotification } = useNotifications()
+
+    // Filter roles based on admin mode
+    const availableRoles = [
+        { value: 'ADMIN', label: t('auth.admin'), desc: 'Acceso total al sistema y gestión de usuarios', hidden: !isAdminMode },
+        { value: 'SUPERVISOR', label: t('auth.supervisor'), desc: t('auth.supervisorDesc'), hidden: false },
+        { value: 'OPERATIVO', label: t('auth.plant'), desc: t('auth.plantDesc'), hidden: false }
+    ].filter(r => !r.hidden)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -49,17 +59,166 @@ export default function RegisterPage() {
                 title: t('auth.accountCreatedTitle'),
                 message: t('auth.accountCreatedMessage')
             })
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error)
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create account. Please try again.'
             addNotification({
                 type: 'ERROR',
                 title: t('auth.accountErrorTitle') || 'Error',
-                message: error.message || 'Failed to create account. Please try again.'
+                message: errorMessage
             })
         } finally {
             setIsLoading(false)
         }
     }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.nameLabel')}</label>
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
+                        <User size={18} />
+                    </div>
+                    <Input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder={t('auth.namePlaceholder')}
+                        className="pl-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.emailLabel')}</label>
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
+                        <Mail size={18} />
+                    </div>
+                    <Input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t('auth.emailPlaceholder')}
+                        className="pl-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.password') || 'Password'}</label>
+                <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
+                        <Lock size={18} />
+                    </div>
+                    <Input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pl-12 pr-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-blue-600 transition-colors"
+                    >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                </div>
+            </div>
+
+            <div className="space-y-2 relative">
+                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.authority')}</label>
+                <button
+                    type="button"
+                    onClick={() => !isLoading && setIsDropdownOpen(!isDropdownOpen)}
+                    className={cn(
+                        "w-full bg-[var(--secondary)]/50 border border-[var(--border)] rounded-[18px] px-5 h-14 text-sm text-left flex items-center justify-between transition-all outline-none text-[var(--foreground)]",
+                        isDropdownOpen ? "ring-2 ring-blue-600 bg-[var(--card)]" : "hover:bg-[var(--secondary)]"
+                    )}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="text-blue-600"><Shield size={18} /></div>
+                        <span className="font-bold uppercase tracking-tight">
+                            {role === 'ADMIN' ? t('auth.admin') : role === 'SUPERVISOR' ? t('auth.supervisor') : t('auth.plant')}
+                        </span>
+                    </div>
+                    <ChevronDown size={18} className={cn("text-[var(--muted-foreground)] transition-transform duration-300", isDropdownOpen && "rotate-180")} />
+                </button>
+
+                <AnimatePresence>
+                    {isDropdownOpen && (
+                        <>
+                            <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute bottom-full mb-3 left-0 right-0 bg-[var(--card)] border border-[var(--border)] rounded-[24px] shadow-2xl z-20 overflow-hidden p-2"
+                            >
+                                {availableRoles.map((option) => (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => {
+                                            setRole(option.value as UserRole)
+                                            setIsDropdownOpen(false)
+                                        }}
+                                        className={cn(
+                                            "w-full text-left px-5 py-4 rounded-[18px] text-sm transition-all flex items-center justify-between group mb-1 last:mb-0",
+                                            role === option.value ? "bg-blue-600 text-white" : "text-[var(--muted-foreground)] hover:bg-[var(--secondary)]"
+                                        )}
+                                    >
+                                        <div>
+                                            <p className={cn("font-bold text-base uppercase", role === option.value ? "text-white" : "text-[var(--foreground)]")}>{option.label}</p>
+                                            <p className={cn("text-[10px] uppercase font-bold tracking-wider mt-0.5", role === option.value ? "text-white/70" : "text-[var(--muted-foreground)]")}>{option.desc}</p>
+                                        </div>
+                                        {role === option.value && <div className="w-2 h-2 rounded-full bg-white shadow-sm" />}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {role === 'ADMIN' && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    className="space-y-2 overflow-hidden"
+                >
+                    <label className="text-[13px] font-bold text-blue-600 ml-1 uppercase tracking-wider">{t('auth.adminCodeLabel')}</label>
+                    <Input
+                        type="password"
+                        required
+                        value={adminCode}
+                        onChange={(e) => setAdminCode(e.target.value)}
+                        placeholder={t('auth.adminCodePlaceholder')}
+                        className="!h-14 !rounded-2xl !bg-blue-500/5 border-blue-600/20 focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
+                    />
+                </motion.div>
+            )}
+
+            <Button
+                type="submit"
+                className="w-full !h-14 text-base !rounded-[20px] bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 font-bold uppercase tracking-widest transition-all active:scale-[0.98]"
+                isLoading={isLoading}
+            >
+                {t('auth.createAccount') || 'SIGN UP'}
+                {!isLoading && <ArrowRight size={18} className="ml-2" />}
+            </Button>
+        </form>
+    )
+}
+
+export default function RegisterPage() {
+    const { t } = useTranslation()
 
     return (
         <div className="min-h-screen flex flex-col lg:flex-row bg-[var(--background)] transition-colors duration-500 font-sans overflow-hidden">
@@ -164,151 +323,9 @@ export default function RegisterPage() {
                             </p>
                         </header>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.nameLabel')}</label>
-                                <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
-                                        <User size={18} />
-                                    </div>
-                                    <Input
-                                        type="text"
-                                        required
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder={t('auth.namePlaceholder')}
-                                        className="pl-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.emailLabel')}</label>
-                                <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
-                                        <Mail size={18} />
-                                    </div>
-                                    <Input
-                                        type="email"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder={t('auth.emailPlaceholder')}
-                                        className="pl-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.password') || 'Password'}</label>
-                                <div className="relative group">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] group-focus-within:text-blue-600 transition-colors">
-                                        <Lock size={18} />
-                                    </div>
-                                    <Input
-                                        type={showPassword ? "text" : "password"}
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        className="pl-12 pr-12 !h-14 !rounded-2xl !bg-[var(--secondary)]/50 border-[var(--border)] focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-blue-600 transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2 relative">
-                                <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-wider">{t('auth.authority')}</label>
-                                <button
-                                    type="button"
-                                    onClick={() => !isLoading && setIsDropdownOpen(!isDropdownOpen)}
-                                    className={cn(
-                                        "w-full bg-[var(--secondary)]/50 border border-[var(--border)] rounded-[18px] px-5 h-14 text-sm text-left flex items-center justify-between transition-all outline-none text-[var(--foreground)]",
-                                        isDropdownOpen ? "ring-2 ring-blue-600 bg-[var(--card)]" : "hover:bg-[var(--secondary)]"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-blue-600"><Shield size={18} /></div>
-                                        <span className="font-bold uppercase tracking-tight">
-                                            {role === 'ADMIN' ? t('auth.admin') : role === 'SUPERVISOR' ? t('auth.supervisor') : t('auth.plant')}
-                                        </span>
-                                    </div>
-                                    <ChevronDown size={18} className={cn("text-[var(--muted-foreground)] transition-transform duration-300", isDropdownOpen && "rotate-180")} />
-                                </button>
-
-                                <AnimatePresence>
-                                    {isDropdownOpen && (
-                                        <>
-                                            <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute bottom-full mb-3 left-0 right-0 bg-[var(--card)] border border-[var(--border)] rounded-[24px] shadow-2xl z-20 overflow-hidden p-2"
-                                            >
-                                                {[
-                                                    { value: 'ADMIN', label: t('auth.admin'), desc: 'Acceso total al sistema y gestión de usuarios' },
-                                                    { value: 'SUPERVISOR', label: t('auth.supervisor'), desc: t('auth.supervisorDesc') },
-                                                    { value: 'OPERATIVO', label: t('auth.plant'), desc: t('auth.plantDesc') }
-                                                ].map((option) => (
-                                                    <button
-                                                        key={option.value}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setRole(option.value as UserRole)
-                                                            setIsDropdownOpen(false)
-                                                        }}
-                                                        className={cn(
-                                                            "w-full text-left px-5 py-4 rounded-[18px] text-sm transition-all flex items-center justify-between group mb-1 last:mb-0",
-                                                            role === option.value ? "bg-blue-600 text-white" : "text-[var(--muted-foreground)] hover:bg-[var(--secondary)]"
-                                                        )}
-                                                    >
-                                                        <div>
-                                                            <p className={cn("font-bold text-base uppercase", role === option.value ? "text-white" : "text-[var(--foreground)]")}>{option.label}</p>
-                                                            <p className={cn("text-[10px] uppercase font-bold tracking-wider mt-0.5", role === option.value ? "text-white/70" : "text-[var(--muted-foreground)]")}>{option.desc}</p>
-                                                        </div>
-                                                        {role === option.value && <div className="w-2 h-2 rounded-full bg-white shadow-sm" />}
-                                                    </button>
-                                                ))}
-                                            </motion.div>
-                                        </>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {role === 'ADMIN' && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    className="space-y-2 overflow-hidden"
-                                >
-                                    <label className="text-[13px] font-bold text-blue-600 ml-1 uppercase tracking-wider">{t('auth.adminCodeLabel')}</label>
-                                    <Input
-                                        type="password"
-                                        required
-                                        value={adminCode}
-                                        onChange={(e) => setAdminCode(e.target.value)}
-                                        placeholder={t('auth.adminCodePlaceholder')}
-                                        className="!h-14 !rounded-2xl !bg-blue-500/5 border-blue-600/20 focus:!bg-[var(--card)] focus:ring-2 focus:ring-blue-600/20 text-base"
-                                    />
-                                </motion.div>
-                            )}
-
-                            <Button
-                                type="submit"
-                                className="w-full !h-14 text-base !rounded-[20px] bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 font-bold uppercase tracking-widest transition-all active:scale-[0.98]"
-                                isLoading={isLoading}
-                            >
-                                {t('auth.createAccount') || 'SIGN UP'}
-                                {!isLoading && <ArrowRight size={18} className="ml-2" />}
-                            </Button>
-                        </form>
+                        <Suspense fallback={<div className="h-64 flex items-center justify-center text-blue-600"><RefreshCcw className="animate-spin" /></div>}>
+                            <RegisterForm />
+                        </Suspense>
 
                         <footer className="pt-8 border-t border-[var(--border)] flex flex-col items-center gap-6">
                             <p className="text-sm font-medium text-[var(--muted-foreground)]">

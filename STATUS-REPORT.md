@@ -1,6 +1,6 @@
 # 📊 Reporte de Estado actual - Serendipity Anthropos OS
 
-Fecha de Evaluación: 10 de Marzo de 2026
+Fecha de Evaluación: 11 de Marzo de 2026
 Proyecto: **Serendipity Anthropos OS**
 
 ## 🏗️ Arquitectura General y Stack Tecnológico
@@ -27,10 +27,15 @@ Proyecto: **Serendipity Anthropos OS**
    - Elementos visuales como el "Ojo de Sophia", el estado climático, la salud algorítmica y las notificaciones en tiempo real, operando orgánicamente.
 3. **Módulos y Vistas Internas:**
    - **Operaciones (`/dashboard/operaciones`):** Vista completamente construida. Visualizador de Tracker de estaciones, Lector e impresora de QR de lotes Maestros, control de métricas de lotes (Verde, Ámbar, Rojo).
-   - **Finanzas (`/dashboard/finanzas`):** Vista construida. Medidores y tarjetas de liquidez de `reservas` y `amortización`. Desglose por `categoría` porcentual visual.
-   - **Reportes (`/dashboard/reportes`):** Vista armada. Gráficas (`PerformanceChart`), selector de rangos de fechas (DateRange) y funcionalidad de exportación a PDF.
+   - **Finanzas (`/dashboard/finanzas`):** Vista construida. Medidores y tarjetas de liquidez de `reservas` y `amortización`. Desglose por `categoría` porcentual visual. Animaciones de carga fluida (Staggered).
+   - **Sophia (`/dashboard/sophia`):** Nueva interfaz premium con chat interactivo, orquestación de micro-agentes y **exportación de informes a PDF**.
+   - **Reportes (`/dashboard/reportes`):** Vista armada. Gráficas (`PerformanceChart`), selector de rangos de fechas (DateRange) y funcionalidad de exportación a PDF conectada a datos reales.
 4. **Landing Page (`/landing` & `/`):**
    - El bucle infinito (pantalla en blanco) que bloqueaba navegación en root y landing ha sido solucionado.
+5. **Onboarding / Registro Seguro (`/register`):**
+   - El modo de registro de Administrador ahora está oculto por defecto para mayor seguridad visual. Solo es accesible mediante el parámetro `?admin=true` en la URL, permitiendo una configuración discreta para líderes del sistema.
+6. **Fluidez UI/UX:**
+   - Optimización general de transiciones (`globals.css`, `layout.tsx`) para una respuesta instantánea en móviles (150ms-200ms).
 
 ### 🚧 Lo que FALTA por terminar/arreglar:
 1. **Refinamiento UI Específico Módulos:** Posibles adaptaciones de responsividad en gráficas o tarjetas muy densas, dependiendo del feedback de los usuarios finales.
@@ -56,13 +61,15 @@ Proyecto: **Serendipity Anthropos OS**
 1. **Sustitución de Mocks en Reportes (`reports.service.ts`):**
    - La sección de reportes ahora se conecta de manera real con las verdaderas métricas históricas procesadas de Supabase, retornando números fehacientes de egresos e ingresos históricos mes a mes del Sistema Anthropos.
 2. **Núcleo Sophia (Arquitectura AI y Contexto DB Backend):**
-   - La API de chat (`/api/ai/chat`) utiliza el SDK de Gemini, pero ahora cuenta con un modelo Factoría para futuras integraciones fletadas por variable de entorno (`ACTIVE_AI_PROVIDER`) con Claude, Groq y OpenRouter. Las lecturas de estado para aconsejar al usuario se procesan conectando la API directamente con Supabase (`finances_state` y `orders`).
+   - La API de chat (`/api/ai/chat`) utiliza el SDK de Gemini. Se ha implementado una arquitectura de **Orquestación de Micro-Agentes** (Financiero, Operativo y Sagrario) que permite a Sophia dar respuestas contextuales profundas basadas en datos reales de la base de datos y documentos.
+3. **Gestión de Usuarios (Admin API):**
+   - Implementación de `/api/admin/users` para creación y eliminación de usuarios con privilegios elevados (bypass RLS) desde el Templo.
+4. **Sagrario y RAG (Vectores):**
+   - Centralización del Vault (`/api/vault`) en el backend. Los documentos se persisten en Supabase y son consultados por Sophia mediante búsqueda semántica (PgVector).
 
 ### 🚧 Lo que FALTA por terminar/arreglar:
 1. **Integración Sagrario Estricto (RAG / Vectores):**
-   - El sistema de chat une el `vaultContext` enviado desde IndexDB localmente, pero falta centralizar la vectorización y una verdadera comunicación RAG que lea de primera mano los documentos directamente desde la BD en formato seguro (PgVector) desde el backend.
-2. **Módulo Webhooks y Automatización (N8N):**
-   - Dejaremos en _Stand-By_ la implementación de sistemas externos como N8N para automatización y triggers, según solicitud de mantener foco estricto en el Anthropos OS nativo.
+   - Sistema centralizado y funcional. Sophia ya puede "leer" la memoria histórica depositada en el Sagrario.
 
 ---
 
