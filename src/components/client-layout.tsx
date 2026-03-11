@@ -22,16 +22,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return (
         <QueryProvider>
             <ConnectivityProvider>
-                <OfflineSyncProvider>
-                    <FinancialClimateManager />
-                    <AuthProvider>
-                        <LanguageProvider>
-                            <NotificationProvider>
+                <LanguageProvider>
+                    <NotificationProvider>
+                        <OfflineSyncProvider>
+                            <FinancialClimateManager />
+                            <AuthProvider>
                                 {children}
-                            </NotificationProvider>
-                        </LanguageProvider>
-                    </AuthProvider>
-                </OfflineSyncProvider>
+                            </AuthProvider>
+                        </OfflineSyncProvider>
+                    </NotificationProvider>
+                </LanguageProvider>
             </ConnectivityProvider>
         </QueryProvider>
     )
