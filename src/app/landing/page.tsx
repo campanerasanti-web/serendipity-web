@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'framer-motion'
 import { ReactLenis } from 'lenis/react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/context/auth-context'
 import {
     Shield, Brain, ArrowRight, Sparkles,
     CheckCircle2, FileText, Archive, Database,
@@ -25,7 +23,6 @@ const COPY = {
     es: {
         nav: ['Sistema', 'Módulos', 'Sophia', 'Acceso'],
         enter: 'Entrar',
-        goToApp: 'Ir al Dashboard',
         // Hero
         heroEyebrow: 'Serendipity OS · Beta 2026',
         heroLine1: 'El sistema',
@@ -89,7 +86,6 @@ const COPY = {
     en: {
         nav: ['System', 'Modules', 'Sophia', 'Access'],
         enter: 'Enter',
-        goToApp: 'Go to Dashboard',
         heroEyebrow: 'Serendipity OS · Beta 2026',
         heroLine1: 'The system',
         heroLine2: 'that thinks',
@@ -145,7 +141,6 @@ const COPY = {
     vn: {
         nav: ['Hệ thống', 'Mô-đun', 'Sophia', 'Truy cập'],
         enter: 'Vào',
-        goToApp: 'Đến Dashboard',
         heroEyebrow: 'Serendipity OS · Beta 2026',
         heroLine1: 'Hệ thống',
         heroLine2: 'suy nghĩ',
@@ -675,7 +670,6 @@ function ClimateOrb({ active, clima }: { active: boolean; clima: { name: string;
 /* ─── PAGE ── */
 export default function LandingPage() {
     const { language } = useTranslation()
-    const { user } = useAuth()
     const lang = (language as Lang) || 'es'
     const c = COPY[lang]
     const [climateIdx, setClimateIdx] = useState(0)
@@ -718,19 +712,11 @@ export default function LandingPage() {
                 <div className="flex items-center gap-1.5 sm:gap-2">
                     {/* Auth controls: language selector + theme toggle */}
                     <AuthControls />
-                    {user ? (
-                        <Link href="/dashboard" className="hidden sm:block">
-                            <Button size="sm" className="!rounded-full h-10 bg-blue-600 text-white hover:bg-blue-500 px-5 gap-2 text-[11px] font-bold uppercase tracking-[0.2em]">
-                                {c.goToApp} <ArrowRight size={14} />
-                            </Button>
-                        </Link>
-                    ) : (
-                        <Link href="/login" className="hidden sm:block">
-                            <Button size="sm" className="!rounded-full h-10 bg-blue-600 text-white hover:bg-blue-500 px-5 gap-2 text-[11px] font-bold uppercase tracking-[0.2em]">
-                                {c.enter} <ArrowRight size={14} />
-                            </Button>
-                        </Link>
-                    )}
+                    <Link href="/login" className="hidden sm:block">
+                        <Button size="sm" className="!rounded-full h-10 bg-blue-600 text-white hover:bg-blue-500 px-5 gap-2 text-[11px] font-bold uppercase tracking-[0.2em]">
+                            {c.enter} <ArrowRight size={14} />
+                        </Button>
+                    </Link>
                 </div>
             </motion.header>
 
@@ -818,14 +804,14 @@ export default function LandingPage() {
                                 transition={{ delay: 0.5, duration: 0.6 }}
                                 className="flex flex-col sm:flex-row items-start gap-3"
                             >
-                                <Link href={user ? "/dashboard" : "/login"}>
+                                <Link href="/login">
                                     <motion.button
                                         whileHover={{ scale: 1.02, y: -1 }}
                                         whileTap={{ scale: 0.98 }}
                                         className="flex items-center gap-3 px-8 rounded-2xl text-white text-[15px] font-bold shadow-lg transition-all whitespace-nowrap bg-blue-600 dark:bg-blue-600 shadow-blue-500/20 dark:shadow-blue-900/40"
                                         style={{ height: '54px' }}
                                     >
-                                        {user ? c.goToApp : c.heroCta}
+                                        {c.heroCta}
                                         <ArrowRight size={18} />
                                     </motion.button>
                                 </Link>
@@ -1231,27 +1217,25 @@ export default function LandingPage() {
                     </h2>
                     <p className="text-zinc-400 text-lg font-medium max-w-md mx-auto">{c.ctaDesc}</p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link href={user ? "/dashboard" : "/login"}>
+                        <Link href="/login">
                             <motion.button
                                 whileHover={{ scale: 1.02, y: -1 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-3 h-14 px-10 rounded-2xl bg-white text-zinc-900 text-[15px] font-bold shadow-lg shadow-white/10 hover:bg-zinc-100 transition-colors"
                             >
-                                {user ? c.goToApp : c.ctaPrimary}
+                                {c.ctaPrimary}
                                 <ArrowRight size={18} />
                             </motion.button>
                         </Link>
-                        {!user && (
-                            <Link href="/register">
-                                <motion.button
-                                    whileHover={{ scale: 1.02, y: -1 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="flex items-center gap-3 h-14 px-10 rounded-2xl border border-white/20 text-zinc-300 text-[15px] font-bold hover:border-white/40 hover:text-white transition-all"
-                                >
-                                    {c.ctaSecondary}
-                                </motion.button>
-                            </Link>
-                        )}
+                        <Link href="/register">
+                            <motion.button
+                                whileHover={{ scale: 1.02, y: -1 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-3 h-14 px-10 rounded-2xl border border-white/20 text-zinc-300 text-[15px] font-bold hover:border-white/40 hover:text-white transition-all"
+                            >
+                                {c.ctaSecondary}
+                            </motion.button>
+                        </Link>
                     </div>
                 </FadeIn>
             </section>

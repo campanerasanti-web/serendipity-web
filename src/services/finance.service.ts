@@ -7,7 +7,13 @@ export class FinanceService {
         const supabase = createClient();
         if (!supabase) throw new Error('Supabase client not available');
 
-        const { data: stateData } = await supabase.from('finances_state').select('*').eq('id', 1).single();
+        let stateData = null;
+        try {
+            const { data, error } = await supabase.from('finances_state').select('*').eq('id', 1).single();
+            if (!error) stateData = data;
+        } catch (e) {
+            console.warn('Could not fetch finances_state, using defaults');
+        }
 
         // Calcular mes actual
         const firstDayOfMonth = new Date();
