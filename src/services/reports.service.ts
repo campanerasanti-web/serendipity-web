@@ -1,4 +1,4 @@
-import { ReportData } from '@/types/reports';
+import { ReportData, ReportInsight } from '@/types/reports';
 import { createClient } from '@/lib/supabase/client';
 import { DateRange } from 'react-day-picker';
 import { isWithinInterval, parseISO } from 'date-fns';
@@ -59,24 +59,48 @@ export class ReportsService {
         const totalProfit = historicalMetrics.reduce((acc, m) => acc + m.profit, 0);
         const avgProfitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
 
+        // Calcular insights dinámicos
+        const insights: ReportInsight[] = [];
+        
+        if (avgProfitMargin < 30) {
+            insights.push({
+                id: '1',
+                title: 'Alerta de Margen',
+                description: `El margen actual del ${avgProfitMargin.toFixed(1)}% está por debajo del objetivo óptimo del 35%.`,
+                type: 'RISK',
+                impact: 'HIGH',
+            });
+        } else {
+            insights.push({
+                id: '1',
+                title: 'Eficiencia de Capital',
+                description: 'El margen operativo muestra una salud robusta. Sophia detecta sincronía financiera.',
+                type: 'OPTIMIZATION',
+                impact: 'MEDIUM',
+            });
+        }
+
+        if (totalRevenue > 10000) {
+            insights.push({
+                id: '2',
+                title: 'Abundancia en el Jardín',
+                description: 'El volumen de SF procesado ha superado el umbral de expansión. Momento de reinversión.',
+                type: 'OPTIMIZATION',
+                impact: 'LOW',
+            });
+        }
+
         return {
             historicalMetrics: historicalMetrics.length > 0 ? historicalMetrics : [
                 { date: new Date().toISOString().slice(0, 7), revenue: 0, expenses: 0, profit: 0, efficiency: 0 }
             ],
-            insights: [
+            insights: insights.length > 0 ? insights : [
                 {
                     id: '1',
-                    title: 'Evaluación del Núcleo',
-                    description: 'El flujo analítico está sincronizado con la base de datos real. Esperando ingesta del Sagrario.',
-                    type: 'OPTIMIZATION',
-                    impact: 'MEDIUM',
-                },
-                {
-                    id: '2',
-                    title: 'Revisión de Gastos Operativos',
-                    description: 'La amortización y gastos de operación mantienen estabilidad. Requiere cruce algorítmico Sophia.',
-                    type: 'RISK',
-                    impact: 'LOW',
+                    title: 'Sincronización Inicial',
+                    description: 'Esperando más ciclos de datos para generar un análisis profundo de Sophia.',
+                    type: 'OPTIMIZATION' as const,
+                    impact: 'LOW' as const,
                 }
             ],
             summary: {

@@ -6,6 +6,7 @@ import QueryProvider from '@/components/providers/query-provider'
 import { NotificationProvider } from '@/context/notification-context'
 import { ConnectivityProvider } from '@/context/connectivity-context'
 import { OfflineSyncProvider } from '@/context/offline-sync-context'
+import { ChatProvider } from '@/context/chat-context'
 import { useEffect } from 'react'
 import { FinancialClimateManager } from '@/components/financial-climate-manager'
 
@@ -27,7 +28,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                         <OfflineSyncProvider>
                             <FinancialClimateManager />
                             <AuthProvider>
-                                {children}
+                                <ChatProvider>
+                                    {children}
+                                </ChatProvider>
                             </AuthProvider>
                         </OfflineSyncProvider>
                     </NotificationProvider>

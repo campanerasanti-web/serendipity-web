@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { Card, Badge, Button, Skeleton, EmptyState, StatCardSkeleton } from '@/components/ui-library'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { Suspense, useState, useMemo, useEffect } from 'react'
 import { DateRange } from 'react-day-picker'
 import { DateRangePicker } from '@/components/date-range-picker'
 
@@ -29,6 +29,8 @@ import { useDashboardData } from '@/hooks/use-dashboard-data'
 import { useNotifications } from '@/context/notification-context'
 import { useTranslation } from '@/context/language-context'
 import { PerformanceChart } from '@/components/dashboard/performance-chart'
+import { MessagingWidget } from '@/components/dashboard/messaging-widget'
+import { AuditModal } from '@/components/dashboard/audit-modal'
 
 export default function DashboardPage() {
     const [date, setDate] = useState<DateRange | undefined>()
@@ -37,6 +39,7 @@ export default function DashboardPage() {
     const { t, language } = useTranslation()
     const { addNotification } = useNotifications()
     const { data: dashData, isLoading } = useDashboardData(date)
+    const [isAuditModalOpen, setIsAuditModalOpen] = useState(false)
 
     if (!user) return null
 
@@ -286,22 +289,10 @@ export default function DashboardPage() {
                         </div>
                     </Card>
 
-                    {/* Messages Demo */}
-                    <div className="space-y-6">
-                        <h3 className="font-bold text-[var(--foreground)] text-xl tracking-tight">{t('dashboard.directMessaging')}</h3>
-                        <Card className="border-none ring-1 ring-[var(--border)] shadow-sm">
-                            <EmptyState
-                                icon={Inbox}
-                                title={t('dashboard.noNewMessages')}
-                                description={t('dashboard.noPendingMessages')}
-                                action={
-                                    <Button variant="secondary" onClick={() => addNotification({ type: 'INFO', title: t('dashboard.composeMessage'), message: t('common.loading') })}>
-                                        {t('dashboard.composeMessage')}
-                                    </Button>
-                                }
-                            />
-                        </Card>
-                    </div>
+                    {/* Messaging Section */}
+                    <Suspense fallback={<Skeleton className="h-[600px] w-full rounded-3xl" />}>
+                        <MessagingWidget />
+                    </Suspense>
                 </div>
 
                 {/* Sidebar area */}
@@ -328,12 +319,17 @@ export default function DashboardPage() {
                                 </div>
                             ))}
                         </div>
-                        <Button variant="secondary" className="w-full text-[13px] font-medium bg-[var(--secondary)]/60 hover:bg-[var(--secondary)] border border-[var(--border)] h-12 !rounded-[14px] shadow-sm transition-all text-[var(--foreground)]" onClick={handleAction}>
+                        <Button variant="secondary" className="w-full text-[13px] font-medium bg-[var(--secondary)]/60 hover:bg-[var(--secondary)] border border-[var(--border)] h-12 !rounded-[14px] shadow-sm transition-all text-[var(--foreground)]" onClick={() => setIsAuditModalOpen(true)}>
                             {t('dashboard.auditHistory')}
                         </Button>
                     </Card>
                 </div>
             </div>
+            
+            <AuditModal 
+                isOpen={isAuditModalOpen} 
+                onClose={() => setIsAuditModalOpen(false)} 
+            />
         </div>
     )
 }

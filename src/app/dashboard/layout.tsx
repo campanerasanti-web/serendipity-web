@@ -31,8 +31,10 @@ import { MobileNav } from '@/components/dashboard/mobile-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { FloatingSophia } from '@/components/floating-sophia'
 import { useNotifications } from '@/context/notification-context'
+import { useSessionTimeout } from '@/hooks/use-session-timeout'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    useSessionTimeout()
     const { user, logout, loading } = useAuth()
     const { t } = useTranslation()
     const { notifications } = useNotifications()
@@ -51,7 +53,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             message: n.message,
             critical: n.type === 'CRITICAL' || n.type === 'ERROR',
             timestamp: n.timestamp,
-            isSophia: false
+            isSophia: false,
+            actionUrl: n.actionUrl
         }))
         const mappedSophia = (sophiaAlerts || []).map(a => ({
             id: a.id,

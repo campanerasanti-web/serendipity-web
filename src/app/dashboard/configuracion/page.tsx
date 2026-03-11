@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, Button, Input, Badge } from '@/components/ui-library'
-import { Settings, Bell, Globe, Lock, Shield, UserCheck, ShieldAlert, Cpu, Database, Mail, MessageSquare, Clock, Trash2 } from 'lucide-react'
+import { Settings, Bell, Globe, Lock, Shield, UserCheck, ShieldAlert, Cpu, Database, Mail, MessageSquare, Clock, Trash2, Sparkles, Fingerprint, Timer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/context/language-context'
 
@@ -100,59 +100,82 @@ export default function ConfiguracionPage() {
                         <section className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <div className="space-y-8">
                                 <div className="flex items-center gap-3">
-                                    <Settings className="text-[var(--muted-foreground)]" size={20} />
-                                    <h3 className="font-bold text-xl tracking-tight text-[var(--foreground)]">{t('common.sophia')}</h3>
+                                    <Sparkles className="text-blue-500" size={20} />
+                                    <h3 className="font-bold text-xl tracking-tight text-[var(--foreground)]">{t('common.sophia')} — Omne est unum</h3>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                     <div className="space-y-3">
-                                        <label className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em] ml-1">{t('temple.productionGoal')}</label>
+                                        <div className="flex items-center gap-2 ml-1">
+                                            <label className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{t('temple.productionGoal')}</label>
+                                            <Badge variant="default" className="text-[9px] py-0">Ritmo</Badge>
+                                        </div>
                                         <Input
                                             type="number"
                                             value={settings.productionGoal}
                                             onChange={(e) => updateSettings({ productionGoal: Number(e.target.value) })}
                                             className="h-14 !rounded-[16px] border border-[var(--border)] bg-[var(--secondary)]/50 focus:bg-[var(--card)] transition-all font-bold text-lg"
                                         />
+                                        <p className="text-[10px] text-[var(--muted-foreground)] ml-1 font-medium">Meta de lotes procesados para análisis de Sophia.</p>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em] ml-1">{t('temple.criticalCashThreshold')}</label>
+                                        <div className="flex items-center gap-2 ml-1">
+                                            <label className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{t('temple.criticalCashThreshold')}</label>
+                                            <Badge variant="critical" className="text-[9px] py-0">Oxígeno</Badge>
+                                        </div>
                                         <Input
                                             type="number"
                                             value={settings.criticalCashThreshold}
                                             onChange={(e) => updateSettings({ criticalCashThreshold: Number(e.target.value) })}
                                             className="h-14 !rounded-[16px] border border-[var(--border)] bg-[var(--secondary)]/50 focus:bg-[var(--card)] transition-all font-bold text-lg"
                                         />
+                                        <p className="text-[10px] text-[var(--muted-foreground)] ml-1 font-medium">Límite de caja bajo el cual Sophia emitirá alertas críticas.</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-6 pt-6 border-t border-[var(--border)]">
-                                <h4 className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{t('temple.activeEngines')}</h4>
+                                <div className="flex items-center gap-2">
+                                    <Cpu size={14} className="text-[var(--muted-foreground)]" />
+                                    <h4 className="text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-[0.2em]">{t('temple.activeEngines')}</h4>
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <button
                                         onClick={() => updateSettings({ reinvestmentLogicEnabled: !settings.reinvestmentLogicEnabled })}
                                         className={cn(
-                                            "p-4 rounded-xl border transition-all flex items-center gap-4 text-left w-full",
-                                            settings.reinvestmentLogicEnabled ? "bg-amber-500/10 border-amber-500/20" : "bg-[var(--secondary)]/30 border-[var(--border)] opacity-60"
+                                            "p-5 rounded-[20px] border transition-all flex items-center gap-4 text-left w-full relative overflow-hidden group",
+                                            settings.reinvestmentLogicEnabled ? "bg-amber-500/5 border-amber-500/20" : "bg-[var(--secondary)]/30 border-[var(--border)] opacity-60"
                                         )}
                                     >
-                                        <Cpu size={20} className={settings.reinvestmentLogicEnabled ? "text-amber-500" : "text-[var(--muted-foreground)]"} />
+                                        <div className={cn(
+                                            "p-3 rounded-xl border transition-all",
+                                            settings.reinvestmentLogicEnabled ? "bg-amber-500/10 border-amber-500/30 text-amber-500" : "bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)]"
+                                        )}>
+                                            <Cpu size={20} />
+                                        </div>
                                         <div>
                                             <p className="text-sm font-bold">{t('temple.reinvestmentLogic')}</p>
                                             <p className="text-[10px] text-[var(--muted-foreground)] font-medium">{t('temple.frequency')}: 24h</p>
                                         </div>
+                                        {settings.reinvestmentLogicEnabled && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
                                     </button>
                                     <button
                                         onClick={() => updateSettings({ hybridRedundancyEnabled: !settings.hybridRedundancyEnabled })}
                                         className={cn(
-                                            "p-4 rounded-xl border transition-all flex items-center gap-4 text-left w-full",
-                                            settings.hybridRedundancyEnabled ? "bg-emerald-500/10 border-emerald-500/20" : "bg-[var(--secondary)]/30 border-[var(--border)] opacity-60"
+                                            "p-5 rounded-[20px] border transition-all flex items-center gap-4 text-left w-full relative overflow-hidden group",
+                                            settings.hybridRedundancyEnabled ? "bg-emerald-500/5 border-emerald-500/20" : "bg-[var(--secondary)]/30 border-[var(--border)] opacity-60"
                                         )}
                                     >
-                                        <Database size={20} className={settings.hybridRedundancyEnabled ? "text-emerald-500" : "text-[var(--muted-foreground)]"} />
+                                        <div className={cn(
+                                            "p-3 rounded-xl border transition-all",
+                                            settings.hybridRedundancyEnabled ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)]"
+                                        )}>
+                                            <Database size={20} />
+                                        </div>
                                         <div>
                                             <p className="text-sm font-bold">{t('temple.hybridRedundancy')}</p>
                                             <p className="text-[10px] text-[var(--muted-foreground)] font-medium">{t('temple.status')}: {settings.hybridRedundancyEnabled ? t('common.synchronized') : t('common.disconnected')}</p>
                                         </div>
+                                        {settings.hybridRedundancyEnabled && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                                     </button>
                                 </div>
                             </div>
@@ -208,17 +231,43 @@ export default function ConfiguracionPage() {
                                     <h3 className="font-bold text-xl tracking-tight text-[var(--foreground)]">{t('temple.dataProtection')}</h3>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <Card glass className="p-6 space-y-4 border-white/5">
-                                        <Lock size={20} className="text-amber-500" />
-                                        <h4 className="font-bold text-sm">{t('temple.twoFactorAuth')}</h4>
-                                        <p className="text-xs text-[var(--muted-foreground)]">{t('temple.twoFactorAuthDesc')}</p>
-                                        <Badge variant="success">{t('common.enabled')}</Badge>
+                                    <Card glass className="p-6 space-y-4 border-white/5 flex flex-col justify-between">
+                                        <div className="space-y-4">
+                                            <Lock size={20} className="text-amber-500" />
+                                            <h4 className="font-bold text-sm">{t('temple.twoFactorAuth')}</h4>
+                                            <p className="text-xs text-[var(--muted-foreground)]">{t('temple.twoFactorAuthDesc')}</p>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-2">
+                                            <Badge variant={settings.security.twoFactorEnabled ? "success" : "default"}>
+                                                {settings.security.twoFactorEnabled ? t('common.enabled') : t('common.disabled')}
+                                            </Badge>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-xs font-bold"
+                                                onClick={() => updateNestedSetting('security', { twoFactorEnabled: !settings.security.twoFactorEnabled })}
+                                            >
+                                                {settings.security.twoFactorEnabled ? t('common.disable') : t('common.enable')}
+                                            </Button>
+                                        </div>
                                     </Card>
                                     <Card glass className="p-6 space-y-4 border-white/5">
                                         <Clock size={20} className="text-blue-500" />
                                         <h4 className="font-bold text-sm">{t('temple.sessionTime')}</h4>
                                         <p className="text-xs text-[var(--muted-foreground)]">{t('temple.sessionTimeDesc')}</p>
-                                        <span className="text-sm font-bold">45 {t('common.minutes')}</span>
+                                        <div className="flex items-center gap-3">
+                                            <select 
+                                                value={settings.security.sessionTimeoutMinutes}
+                                                onChange={(e) => updateNestedSetting('security', { sessionTimeoutMinutes: Number(e.target.value) })}
+                                                className="bg-[var(--secondary)] border border-[var(--border)] rounded-lg px-2 py-1 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            >
+                                                <option value={15}>15 {t('common.minutes')}</option>
+                                                <option value={30}>30 {t('common.minutes')}</option>
+                                                <option value={45}>45 {t('common.minutes')}</option>
+                                                <option value={60}>60 {t('common.minutes')}</option>
+                                                <option value={120}>2 {t('common.hours')}</option>
+                                            </select>
+                                        </div>
                                     </Card>
                                 </div>
                                 <div className="pt-4 border-t border-[var(--border)]">

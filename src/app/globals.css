@@ -169,6 +169,23 @@ html.lenis {
   background: rgba(142, 142, 147, 0.2);
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(142, 142, 147, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(142, 142, 147, 0.3);
+}
+
 .text-balance {
   text-wrap: balance;
 }
