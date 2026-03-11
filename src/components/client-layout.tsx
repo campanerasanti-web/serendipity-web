@@ -4,6 +4,8 @@ import { AuthProvider } from '@/context/auth-context'
 import { LanguageProvider } from '@/context/language-context'
 import QueryProvider from '@/components/providers/query-provider'
 import { NotificationProvider } from '@/context/notification-context'
+import { ConnectivityProvider } from '@/context/connectivity-context'
+import { OfflineSyncProvider } from '@/context/offline-sync-context'
 import { useEffect } from 'react'
 import { FinancialClimateManager } from '@/components/financial-climate-manager'
 
@@ -19,14 +21,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <QueryProvider>
-            <FinancialClimateManager />
-            <AuthProvider>
-                <LanguageProvider>
-                    <NotificationProvider>
-                        {children}
-                    </NotificationProvider>
-                </LanguageProvider>
-            </AuthProvider>
+            <ConnectivityProvider>
+                <OfflineSyncProvider>
+                    <FinancialClimateManager />
+                    <AuthProvider>
+                        <LanguageProvider>
+                            <NotificationProvider>
+                                {children}
+                            </NotificationProvider>
+                        </LanguageProvider>
+                    </AuthProvider>
+                </OfflineSyncProvider>
+            </ConnectivityProvider>
         </QueryProvider>
     )
 }
