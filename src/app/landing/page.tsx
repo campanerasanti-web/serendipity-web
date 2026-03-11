@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'framer-motion'
-import { ReactLenis } from '@studio-freight/react-lenis'
+import { ReactLenis } from 'lenis/react'
 import {
     Shield, Brain, ArrowRight, Sparkles,
     CheckCircle2, FileText, Archive, Database,
