@@ -14,6 +14,7 @@ import { useNotifications } from '@/context/notification-context'
 import { useBiometrics } from '@/hooks/use-biometrics'
 import { useSettings } from '@/hooks/use-settings'
 import { CheckCircle2, ShieldCheck, KeyRound } from 'lucide-react'
+import { sendMfaEmail, verifyMfaCode } from '@/app/actions/mfa'
 
 export default function LoginPage() {
     const { login, loginWithOtp, loading } = useAuth()
@@ -25,35 +26,42 @@ export default function LoginPage() {
     const [step, setStep] = useState<'LOGIN' | 'MFA'>('LOGIN')
     const [otpCode, setOtpCode] = useState('')
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false)
+    const [pendingMfaAuth, setPendingMfaAuth] = useState<{hash: string, expiration: number} | null>(null)
+    const [mfaError, setMfaError] = useState<string | null>(null)
     
     const [identity, setIdentity] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
-    const [canUseBiometrics, setCanUseBiometrics] = useState(false)
     const [showEnrollmentModal, setShowEnrollmentModal] = useState(false)
     const [isEnrolling, setIsEnrolling] = useState(false)
     const [isBiometricAuthenticating, setIsBiometricAuthenticating] = useState(false)
     const [isSkipping, setIsSkipping] = useState(false)
+    const [biometricHint, setBiometricHint] = useState<string | null>(null)
     const { isSupported, enroll, authenticate } = useBiometrics()
 
     useEffect(() => {
-        // Check if user has logged in before on this device
+        // Just pre-fill the email if it was saved, but don't limit visibility here
         const savedAuth = localStorage.getItem('anthropos_biometric_auth')
         if (savedAuth) {
             try {
                 const { email } = JSON.parse(savedAuth)
                 if (email) {
-                    setCanUseBiometrics(true)
                     setIdentity(email)
                 }
-            } catch (e) {
-                // Ignore parse errors
-            }
+            } catch (e) {}
         }
     }, [])
 
     const handleBiometric = async () => {
         if (!isSupported) return;
+        
+        const savedAuth = localStorage.getItem('anthropos_biometric_auth')
+        if (!savedAuth) {
+            setBiometricHint('Inicia sesión primero para poder activar la biometría en este dispositivo.')
+            setTimeout(() => setBiometricHint(null), 4000)
+            return;
+        }
+
         setIsBiometricAuthenticating(true);
 
         try {
@@ -72,7 +80,7 @@ export default function LoginPage() {
                     title: t('auth.biometricSuccessTitle') || 'Acceso exitoso',
                     message: t('auth.biometricSuccessMessage') || 'Redirigiendo al panel...'
                 })
-                window.location.href = '/dashboard'
+                router.push('/dashboard')
             }
         } catch (error: any) {
             console.error('[Biometric Error]', error)
@@ -93,12 +101,29 @@ export default function LoginPage() {
 
             // If 2FA is enabled in system settings, we show a second step
             if (settings.security.twoFactorEnabled) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const lastVerified = localStorage.getItem('anthropos_mfa_last_verified');
+
+                // Si ya se verificó hoy en este dispositivo, saltamos el MFA
+                if (lastVerified === todayStr) {
+                    handleSuccess()
+                    return
+                }
+
                 setStep('MFA')
-                addNotification({
-                    type: 'INFO',
-                    title: 'Verificación de Identidad',
-                    message: 'Ritual de Seguridad activado. Por favor, ingresa el código de acceso.'
-                })
+
+                // Realizar envío de correo con OTP vía Server Action
+                const res = await sendMfaEmail(identity)
+
+                if (res.success && res.hash && res.expiration) {
+                    setPendingMfaAuth({ hash: res.hash, expiration: res.expiration })
+                } else {
+                    addNotification({
+                        type: 'ERROR',
+                        title: t('auth.oracleSophia') || 'Sophia Oracle',
+                        message: res.error || t('auth.loginErrorMessage')
+                    })
+                }
                 return
             }
 
@@ -115,22 +140,34 @@ export default function LoginPage() {
 
     const handleMFA = async (e: React.FormEvent) => {
         e.preventDefault()
+        setMfaError(null)
         setIsVerifyingOtp(true)
         try {
-            // In a real scenario, we'd verify the OTP with Supabase or a custom service
-            // Here we'll simulate a 6-digit verification ritual
             if (otpCode.length === 6) {
-                // Simulate verification delay
-                await new Promise(resolve => setTimeout(resolve, 1500))
-                handleSuccess()
+                if (!pendingMfaAuth) {
+                    throw new Error("Parámetros de seguridad de código faltantes. Refresca la página y vuelve a intentar.")
+                }
+
+                // Llamar Server Action para verificar el código vs el HMAC guardado
+                const res = await verifyMfaCode(identity, otpCode, pendingMfaAuth.hash, pendingMfaAuth.expiration)
+                
+                if (res.success) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    localStorage.setItem('anthropos_mfa_last_verified', todayStr);
+                    handleSuccess()
+                } else {
+                    throw new Error(res.error || "Código incorrecto o expirado")
+                }
             } else {
                 throw new Error("El código debe ser de 6 dígitos")
             }
         } catch (error: any) {
+            setMfaError(error.message || 'Código incorrecto')
+            setOtpCode('')
             addNotification({
                 type: 'ERROR',
-                title: 'Fallo de Sincronía',
-                message: error.message || 'Código incorrecto'
+                title: t('auth.adminCodeErrorTitle'),
+                message: error.message || t('auth.loginErrorMessage')
             })
         } finally {
             setIsVerifyingOtp(false)
@@ -138,6 +175,12 @@ export default function LoginPage() {
     }
 
     const handleSuccess = () => {
+        addNotification({
+            type: 'SUCCESS',
+            title: t('auth.loginSuccessTitle'),
+            message: t('auth.loginSuccessMessage', { user: identity })
+        })
+
         // Check if user has already enrolled biometrics
         const savedAuth = localStorage.getItem('anthropos_biometric_auth')
 
@@ -147,7 +190,7 @@ export default function LoginPage() {
             // Save for handleBiometric to use later
             localStorage.setItem('anthropos_biometric_auth_pending', JSON.stringify({ email: identity }))
         } else {
-            window.location.href = '/dashboard'
+            router.push('/dashboard')
         }
     }
 
@@ -318,7 +361,7 @@ export default function LoginPage() {
                                                 type="submit"
                                                 className={cn(
                                                     "flex-1 !h-14 text-base !rounded-[20px] bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 font-bold uppercase tracking-widest transition-all active:scale-[0.98]",
-                                                    canUseBiometrics && "w-[calc(100%-68px)]"
+                                                    isSupported && "w-[calc(100%-68px)]"
                                                 )}
                                                 isLoading={loading}
                                             >
@@ -326,7 +369,7 @@ export default function LoginPage() {
                                                 {!loading && <ArrowRight size={18} className="ml-2" />}
                                             </Button>
 
-                                            {canUseBiometrics && (
+                                            {isSupported && (
                                                 <Button
                                                     type="button"
                                                     onClick={handleBiometric}
@@ -334,10 +377,23 @@ export default function LoginPage() {
                                                     isLoading={isBiometricAuthenticating}
                                                     className="!w-14 !h-14 !rounded-full bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20 flex items-center justify-center transition-all active:scale-[0.95] shrink-0"
                                                 >
-                                                    {!isBiometricAuthenticating && <Fingerprint size={26} />}
+                                                    {!isBiometricAuthenticating && <Fingerprint size={38} />}
                                                 </Button>
                                             )}
                                         </div>
+
+                                        <AnimatePresence>
+                                            {biometricHint && (
+                                                <motion.p
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    className="text-[11px] text-blue-600 font-bold text-center uppercase tracking-tighter leading-tight px-4"
+                                                >
+                                                    {biometricHint}
+                                                </motion.p>
+                                            )}
+                                        </AnimatePresence>
                                     </form>
 
                                     <footer className="pt-8 border-t border-[var(--border)] flex flex-col items-center gap-6">
@@ -348,7 +404,7 @@ export default function LoginPage() {
                                             </Link>
                                         </p>
 
-                                        <Link href="/landing">
+                                        <Link href="/">
                                             <Button variant="ghost" size="sm" className="!rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
                                                 <ChevronLeft size={14} className="mr-1" /> {t('common.backToStart') || 'Back to Start'}
                                             </Button>
@@ -371,7 +427,7 @@ export default function LoginPage() {
                                             Verificación Ritual
                                         </h1>
                                         <p className="text-[var(--muted-foreground)] text-sm font-medium leading-relaxed">
-                                            El Templo requiere una segunda llave de paso para sincronizar tu identidad.
+                                            El Templo requiere una segunda llave de paso enviada a tu correo electrónico para sincronizar tu identidad.
                                         </p>
                                     </header>
 
@@ -379,7 +435,7 @@ export default function LoginPage() {
                                         <div className="space-y-4">
                                             <label className="text-[13px] font-bold text-[var(--muted-foreground)] ml-1 uppercase tracking-widest block text-center">Código de Sincronía</label>
                                             <div className="relative group max-w-[280px] mx-auto">
-                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 group-focus-within:scale-110 transition-transform">
+                                                <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 transition-transform", mfaError ? "text-red-500" : "text-amber-500 group-focus-within:scale-110")}>
                                                     <KeyRound size={22} />
                                                 </div>
                                                 <Input
@@ -387,12 +443,24 @@ export default function LoginPage() {
                                                     required
                                                     maxLength={6}
                                                     value={otpCode}
-                                                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                                                    onChange={(e) => {
+                                                        setOtpCode(e.target.value.replace(/\D/g, ''))
+                                                        if (mfaError) setMfaError(null)
+                                                    }}
                                                     placeholder="000000"
-                                                    className="pl-14 !h-16 !rounded-2xl !bg-amber-500/5 border-amber-500/20 focus:!bg-[var(--card)] focus:ring-4 focus:ring-amber-500/10 text-center text-3xl font-black tracking-[0.3em] overflow-hidden"
+                                                    className={cn(
+                                                        "pl-14 !h-16 !rounded-2xl focus:!bg-[var(--card)] text-center text-3xl font-black tracking-[0.3em] overflow-hidden",
+                                                        mfaError 
+                                                            ? "!bg-red-500/10 border-red-500/50 focus:ring-4 focus:ring-red-500/20 text-red-500"
+                                                            : "!bg-amber-500/5 border-amber-500/20 focus:ring-4 focus:ring-amber-500/10"
+                                                    )}
                                                 />
                                             </div>
-                                            <p className="text-[10px] text-center text-[var(--muted-foreground)] uppercase tracking-tighter">Ingresa los 6 dígitos enviados a tu dispositivo</p>
+                                            {mfaError ? (
+                                                <p className="text-[11px] font-bold text-center text-red-500 uppercase tracking-tighter animate-pulse">{mfaError}</p>
+                                            ) : (
+                                                <p className="text-[10px] text-center text-[var(--muted-foreground)] uppercase tracking-tighter">Ingresa los 6 dígitos enviados a tu correo</p>
+                                            )}
                                         </div>
 
                                         <div className="flex flex-col gap-4">
@@ -433,7 +501,7 @@ export default function LoginPage() {
                                 onClick={() => {
                                     if (isEnrolling || isSkipping) return;
                                     setIsSkipping(true);
-                                    window.location.href = '/dashboard';
+                                    router.push('/dashboard');
                                 }}
                             />
                             <motion.div
@@ -462,12 +530,13 @@ export default function LoginPage() {
                                                         localStorage.setItem('anthropos_biometric_auth', pending);
                                                         localStorage.removeItem('anthropos_biometric_auth_pending');
                                                     }
-                                                    window.location.href = '/dashboard';
+                                                    router.push('/dashboard');
                                                 } else {
                                                     setIsEnrolling(false);
                                                 }
                                             } catch (e) {
                                                 setIsEnrolling(false);
+                                                // Removed router.push('/dashboard') so they must succeed, or press Skip.
                                             }
                                         }}
                                         isLoading={isEnrolling}
@@ -481,7 +550,7 @@ export default function LoginPage() {
                                         onClick={() => {
                                             if (isEnrolling || isSkipping) return;
                                             setIsSkipping(true);
-                                            window.location.href = '/dashboard';
+                                            router.push('/dashboard');
                                         }}
                                         isLoading={isSkipping}
                                         disabled={isEnrolling || isSkipping}

@@ -32,6 +32,7 @@ export function Sidebar({ isOpen, isDesktop, setOpen, menuItems }: SidebarProps)
                 width: isOpen ? 280 : (isDesktop ? 88 : 0),
                 x: !isDesktop && !isOpen ? -280 : 0
             }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
                 "fixed inset-y-0 left-0 bg-[var(--card)]/80 apple-blur border-r border-[var(--climate-border)] z-50 overflow-hidden",
                 !isDesktop && "shadow-2xl shadow-black/20"

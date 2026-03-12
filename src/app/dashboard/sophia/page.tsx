@@ -149,8 +149,8 @@ export default function SophiaPage() {
             
             addNotification({
                 type: 'SUCCESS',
-                title: 'Reporte Generado',
-                message: 'El PDF se ha descargado correctamente.'
+                title: t('sophia.reportGenerated'),
+                message: t('sophia.reportSuccessMessage')
             })
         } catch (error) {
             console.error('PDF Error:', error)
@@ -290,7 +290,7 @@ export default function SophiaPage() {
                                                                     onClick={() => downloadMessageAsPDF(msg.content)}
                                                                 >
                                                                     <Download size={14} />
-                                                                    Descargar PDF
+                                                                    {t('sophia.downloadPdf')}
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -304,7 +304,7 @@ export default function SophiaPage() {
                                                                 onClick={() => downloadMessageAsPDF(msg.content)}
                                                             >
                                                                 <Download size={14} />
-                                                                Descargar Informe
+                                                                {t('sophia.downloadReport')}
                                                             </Button>
                                                         </div>
                                                     )}

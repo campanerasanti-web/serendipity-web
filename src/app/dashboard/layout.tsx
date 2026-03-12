@@ -19,6 +19,7 @@ import {
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui-library'
 import { CommandPalette } from '@/components/command-palette'
 import { useSophia } from '@/hooks/use-sophia'
 import { useFinancialClimate } from '@/hooks/use-financial-climate'
@@ -32,6 +33,8 @@ import { LoadingScreen } from '@/components/loading-screen'
 import { FloatingSophia } from '@/components/floating-sophia'
 import { useNotifications } from '@/context/notification-context'
 import { useSessionTimeout } from '@/hooks/use-session-timeout'
+import { MessagingWidget } from '@/components/dashboard/messaging-widget'
+import { X } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     useSessionTimeout()
@@ -43,6 +46,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [isSidebarOpen, setSidebarOpen] = useState(false)
     const [isDesktop, setIsDesktop] = useState(true)
     const [isDarkMode, setIsDarkMode] = useState(false)
+    const [isMessagingOpen, setIsMessagingOpen] = useState(false)
 
     const { alerts: sophiaAlerts } = useSophia()
 
@@ -231,10 +235,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <AnimatePresence mode="popLayout" initial={false}>
                         <motion.div
                             key={pathname}
-                            initial={{ opacity: 0, scale: 0.98, y: 8 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 1.02, y: -8 }}
-                            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
                         >
                             {children}
                         </motion.div>
@@ -243,7 +247,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </main>
 
             <MobileNav filteredMenu={filteredMenu} />
-            <FloatingSophia />
+            <FloatingSophia onOpenMessaging={() => setIsMessagingOpen(true)} />
+
+            <AnimatePresence>
+                {isMessagingOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 lg:p-10">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMessagingOpen(false)}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="relative w-full max-w-6xl h-[92vh] lg:h-full lg:max-h-[85vh] bg-[var(--background)] rounded-[32px] lg:rounded-[40px] shadow-2xl overflow-hidden border border-white/20 lg:border-[var(--border)] ring-1 ring-black/5"
+                        >
+                            <div className="absolute top-4 right-4 lg:top-6 lg:right-6 z-[210]">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsMessagingOpen(false)}
+                                    className="!rounded-full bg-[var(--secondary)]/50 hover:bg-[var(--secondary)]/80 text-[var(--muted-foreground)] backdrop-blur-md w-8 h-8 lg:w-10 lg:h-10"
+                                >
+                                    <X size={18} className="lg:scale-110" />
+                                </Button>
+                            </div>
+                            <div className="h-full overflow-hidden p-0 lg:p-4 pt-4 lg:pt-6">
+                                <MessagingWidget />
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

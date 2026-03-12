@@ -58,24 +58,26 @@ export function DateRangePicker({ date, onDateChange, className, align = 'right'
                 variant={date ? "secondary" : "ghost"}
                 size="sm"
                 className={cn(
-                    "h-10 px-4 !rounded-[14px] text-[13px] font-medium transition-all flex items-center gap-2",
+                    "h-10 px-4 !rounded-[14px] text-[13px] font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto",
                     date ? "border border-[var(--border)] shadow-sm" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
                 )}
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <CalendarIcon size={14} className={date ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"} />
-                {date?.from ? (
-                    date.to ? (
-                        <>
-                            {format(date.from, "LLL dd, y", { locale: currentLocale })} -{" "}
-                            {format(date.to, "LLL dd, y", { locale: currentLocale })}
-                        </>
+                <CalendarIcon size={14} className={cn("shrink-0", date ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")} />
+                <span className="truncate max-w-[140px] sm:max-w-none inline-block text-left mt-[1px]">
+                    {date?.from ? (
+                        date.to ? (
+                            <>
+                                {format(date.from, "LLL dd, y", { locale: currentLocale })} -{" "}
+                                {format(date.to, "LLL dd, y", { locale: currentLocale })}
+                            </>
+                        ) : (
+                            format(date.from, "LLL dd, y", { locale: currentLocale })
+                        )
                     ) : (
-                        format(date.from, "LLL dd, y", { locale: currentLocale })
-                    )
-                ) : (
-                    <span>{t('common.customRange')}</span>
-                )}
+                        <span>{t('common.customRange')}</span>
+                    )}
+                </span>
             </Button>
 
             <AnimatePresence>

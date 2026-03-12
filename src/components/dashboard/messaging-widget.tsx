@@ -21,7 +21,10 @@ export function MessagingWidget() {
         selectedUserId, 
         setSelectedUserId, 
         loading, 
+        loadingMore,
+        hasMore,
         sendMessage, 
+        loadMoreMessages,
         markAsRead 
     } = useMessaging()
 
@@ -37,7 +40,9 @@ export function MessagingWidget() {
     const [searchTerm, setSearchTerm] = useState('')
     const [inputValue, setInputValue] = useState('')
     const [isCritical, setIsCritical] = useState(false)
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
     const chatContainerRef = useRef<HTMLDivElement>(null)
+    const lastScrollHeightRef = useRef<number>(0)
 
     const selectedChat = conversations.find(c => c.user.id === selectedUserId)
 
@@ -47,10 +52,27 @@ export function MessagingWidget() {
     )
 
     useEffect(() => {
-        if (chatContainerRef.current) {
+        if (chatContainerRef.current && shouldAutoScroll) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+        } else if (chatContainerRef.current && !shouldAutoScroll && loadingMore) {
+            // Preserve scroll position when loading more
+            const newScrollHeight = chatContainerRef.current.scrollHeight
+            const diff = newScrollHeight - lastScrollHeightRef.current
+            chatContainerRef.current.scrollTop = diff
         }
-    }, [activeChatMessages])
+        lastScrollHeightRef.current = chatContainerRef.current?.scrollHeight || 0
+    }, [activeChatMessages, shouldAutoScroll, loadingMore])
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget
+        const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 100
+        setShouldAutoScroll(isAtBottom)
+
+        if (target.scrollTop === 0 && hasMore && !loadingMore) {
+            lastScrollHeightRef.current = target.scrollHeight
+            loadMoreMessages()
+        }
+    }
 
     const handleSend = async () => {
         if (!inputValue.trim() || !selectedUserId) return
@@ -70,12 +92,14 @@ export function MessagingWidget() {
     }
 
     return (
-        <div className="space-y-6">
-            <h3 className="font-bold text-[var(--foreground)] text-xl tracking-tight mb-2">
-                {t('dashboard.directMessaging')}
-            </h3>
+        <div className="flex flex-col h-full space-y-3 lg:space-y-4">
+            <div className="flex items-center justify-between px-6 lg:px-2">
+                <h3 className="font-bold text-[var(--foreground)] text-lg lg:text-xl tracking-tight">
+                    {t('dashboard.directMessaging')}
+                </h3>
+            </div>
             
-            <Card className="p-0 border-none ring-1 ring-[var(--border)] shadow-xl overflow-hidden h-[700px] flex flex-col lg:flex-row bg-[var(--card)]/50 backdrop-blur-md">
+            <Card className="flex-1 p-0 border-none ring-1 ring-[var(--border)] shadow-xl overflow-hidden flex flex-col lg:flex-row bg-[var(--card)]/30 backdrop-blur-xl rounded-[28px] lg:rounded-[32px] h-full m-1 lg:m-0">
                 {/* Sidebar - Chat List */}
                 <div className={cn(
                     "w-full lg:w-[350px] border-r border-[var(--border)] flex flex-col h-full bg-[var(--secondary)]/10",
@@ -180,7 +204,20 @@ export function MessagingWidget() {
                             </div>
 
                             {/* Chat Messages */}
-                            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-[var(--secondary)]/5">
+                            <div 
+                                ref={chatContainerRef} 
+                                onScroll={handleScroll}
+                                className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gradient-to-b from-transparent to-[var(--secondary)]/5"
+                            >
+                                {hasMore && (
+                                    <div className="flex justify-center py-4">
+                                        {loadingMore ? (
+                                            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <p className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase tracking-widest opacity-40">Desliza hacia arriba para ver más</p>
+                                        )}
+                                    </div>
+                                )}
                                 <AnimatePresence mode="popLayout">
                                     {activeChatMessages.map((msg, idx) => {
                                         const isMine = msg.sender_id === currentUser?.id
@@ -287,7 +324,7 @@ export function MessagingWidget() {
                             <div className="w-24 h-24 bg-blue-500/10 rounded-[40px] flex items-center justify-center text-blue-500 mb-8 border border-blue-500/10">
                                 <Bot size={48} className="animate-breathing" />
                             </div>
-                            <h4 className="text-2xl font-black text-[var(--foreground)] mb-4 tracking-tighter">SIMETRÍA DIRECTA</h4>
+                            <h4 className="text-xl font-bold text-[var(--foreground)] mb-4 tracking-tight">Simetría Directa</h4>
                             <p className="text-sm text-[var(--muted-foreground)] font-medium max-w-sm leading-relaxed mb-8">
                                 Selecciona una frecuencia de comunicación en el panel lateral para iniciar la sincronía con otros agentes del sistema Anthropos.
                             </p>

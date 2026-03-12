@@ -74,8 +74,8 @@ export default function OperacionesPage() {
             if (isLastStation) {
                 addNotification({
                     type: 'INFO',
-                    title: language === 'es' ? 'Lote Finalizado' : 'Batch Completed',
-                    message: language === 'es' ? 'El lote ya se encuentra en su etapa final.' : 'This batch is already in its final stage.'
+                    title: t('operations.batchCompleted'),
+                    message: t('operations.batchInFinalStage')
                 })
                 return
             }
@@ -130,19 +130,19 @@ export default function OperacionesPage() {
         if (isCritical) {
             addNotification({
                 type: 'ERROR',
-                title: language === 'es' ? `Alerta Crítica: Yield bajo en ${pendingYieldCheck.id}` : `Critical Alert: Low Yield in ${pendingYieldCheck.id}`,
-                message: language === 'es'
-                    ? `Rendimiento: ${yieldPct}% (Pérdida de ${expected - actual} SF). Sophia registrará anomalía.`
-                    : `Yield: ${yieldPct}% (${expected - actual} SF loss). Sophia will register anomaly.`
+                title: t('operations.lowYieldAlert', { id: pendingYieldCheck.id }),
+                message: t('operations.lowYieldMessage', { 
+                    pct: yieldPct, 
+                    loss: expected - actual, 
+                    unit: pendingYieldCheck.unit 
+                })
             })
             updateStatus({ orderId: pendingYieldCheck.id, status: 'red' })
         } else {
             addNotification({
                 type: 'SUCCESS',
-                title: language === 'es' ? `Control de Calidad Aprobado en ${pendingYieldCheck.id}` : `Quality Control Approved in ${pendingYieldCheck.id}`,
-                message: language === 'es'
-                    ? `Sincronía perfecta. Rendimiento: ${yieldPct}%.`
-                    : `Perfect symmetry. Yield: ${yieldPct}%.`
+                title: t('operations.qcPassed', { id: pendingYieldCheck.id }),
+                message: t('operations.qcPassedMessage', { pct: yieldPct })
             })
             updateStatus({ orderId: pendingYieldCheck.id, status: 'green' })
         }
@@ -445,7 +445,7 @@ export default function OperacionesPage() {
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
-                            className="bg-[var(--card)] p-12 rounded-[40px] border border-[var(--border)] shadow-2xl max-w-sm w-full text-center relative"
+                            className="bg-[var(--card)] p-6 sm:p-12 rounded-[32px] sm:rounded-[40px] border border-[var(--border)] shadow-2xl max-w-sm w-full text-center relative max-h-[90dvh] overflow-y-auto"
                             onClick={e => e.stopPropagation()}
                         >
                             <h3 className="text-2xl font-bold mb-2 uppercase tracking-tight text-[var(--foreground)]">{t('operations.syncLabel')}</h3>
@@ -612,7 +612,7 @@ export default function OperacionesPage() {
                             initial={{ scale: 0.95, y: 10 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 10 }}
-                            className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-sm w-full relative"
+                            className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-sm w-full relative max-h-[90dvh] overflow-y-auto"
                         >
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 rounded-[16px] bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 border border-blue-500/20">
@@ -685,7 +685,7 @@ export default function OperacionesPage() {
                             initial={{ scale: 0.95, y: 10 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 10 }}
-                            className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-md w-full relative"
+                            className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-md w-full relative max-h-[90dvh] overflow-y-auto"
                         >
                             <button
                                 onClick={() => setIsCreateModalOpen(false)}

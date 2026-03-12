@@ -11,6 +11,9 @@ export function useMessaging() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const MESSAGES_PER_PAGE = 20;
 
     const fetchMessages = useCallback(async () => {
         if (!user) return;
@@ -39,12 +42,18 @@ export function useMessaging() {
             .on(
                 'postgres_changes',
                 {
-                    event: '*',
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
                 },
-                () => {
-                    fetchMessages();
+                (payload) => {
+                    const newMsg = payload.new as Message;
+                    // Only add if it's relevant to current user
+                    if (newMsg.sender_id === user.id || newMsg.receiver_id === user.id) {
+                        // We need the sender/receiver info which isn't in payload.new
+                        // So we refresh to get full data, or we could manually fetch the new one
+                        fetchMessages(); 
+                    }
                 }
             )
             .subscribe();
@@ -90,10 +99,53 @@ export function useMessaging() {
             .sort((a, b) => a.created_at.localeCompare(b.created_at));
     }, [messages, activeChatId, user]);
 
+    const loadMoreMessages = useCallback(async () => {
+        if (!user || !activeChatId || loadingMore || !hasMore) return;
+        
+        setLoadingMore(true);
+        const currentCount = activeChatMessages.length;
+        const moreData = await MessagingService.getChatMessages(
+            user.id, 
+            activeChatId, 
+            MESSAGES_PER_PAGE, 
+            currentCount
+        );
+
+        if (moreData.length < MESSAGES_PER_PAGE) {
+            setHasMore(false);
+        }
+
+        if (moreData.length > 0) {
+            setMessages(prev => {
+                // Filter out duplicates just in case
+                const existingIds = new Set(prev.map(m => m.id));
+                const newItems = moreData.filter(m => !existingIds.has(m.id));
+                return [...prev, ...newItems];
+            });
+        }
+        setLoadingMore(false);
+    }, [user, activeChatId, loadingMore, hasMore, activeChatMessages.length]);
+
+    // Reset hasMore when switching chats
+    useEffect(() => {
+        setHasMore(true);
+    }, [activeChatId]);
+
     const sendMessage = async (content: string, isCritical: boolean = false) => {
         if (!user || !activeChatId) return;
         const newMessage = await MessagingService.sendMessage(user.id, activeChatId, content, isCritical);
-        await fetchMessages();
+        
+        // Add full message data (including joined fields) to state immediately
+        // Instead of global refresh, fetch the specific new message
+        const fullMsg = await MessagingService.getChatMessages(user.id, activeChatId, 1, 0);
+        if (fullMsg.length > 0) {
+            setMessages(prev => {
+                const exists = prev.find(m => m.id === fullMsg[0].id);
+                if (exists) return prev;
+                return [fullMsg[0], ...prev];
+            });
+        }
+        
         return newMessage;
     };
 
@@ -108,7 +160,10 @@ export function useMessaging() {
         selectedUserId: activeChatId,
         setSelectedUserId: setActiveChatId,
         loading,
+        loadingMore,
+        hasMore,
         sendMessage,
+        loadMoreMessages,
         markAsRead,
         refresh: fetchMessages
     };

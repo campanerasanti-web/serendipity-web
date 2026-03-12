@@ -535,7 +535,7 @@ function AppMockup({ lang }: { lang: 'es' | 'en' | 'vn' }) {
                         </div>
 
                         {/* Page content */}
-                        <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3">
+                        <div className="flex-1 p-3 sm:p-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3 hide-scrollbar">
 
                             {/* Badge + Greeting */}
                             <div>
@@ -546,26 +546,26 @@ function AppMockup({ lang }: { lang: 'es' | 'en' | 'vn' }) {
                                 <div className="flex items-start justify-between gap-2">
                                     <div>
                                         <h3 className="text-[16px] font-black leading-tight" style={{ color: txt0 }}>
-                                            {lang === 'es' ? 'Buen d\u00eda, Admin' : 'Good morning, Admin'}
+                                            {lang === 'es' ? 'Buen día, Admin' : 'Good morning, Admin'}
                                         </h3>
                                         <p className="text-[10px] font-medium mt-0.5 max-w-[200px] leading-snug" style={{ color: txt1 }}>
-                                            {lang === 'es' ? '\u00c9poca de Cosecha. El balance es estable y el futuro, claro.' : 'Harvest season. Balance stable.'}
+                                            {lang === 'es' ? 'Época de Cosecha. El balance es estable y el futuro, claro.' : 'Harvest season. Balance stable.'}
                                         </p>
                                     </div>
                                     {/* Status panel */}
                                     <div className="shrink-0 text-right">
                                         <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: txt2 }}>STATUS: SIEMBRA</p>
-                                        <p className="text-[8px] font-bold" style={{ color: '#3b82f6' }}>Simetr\u00eda Sagrada</p>
-                                        <p className="text-[7px] mt-0.5" style={{ color: txt2 }}>mi\u00e9rcoles, 11 de marzo</p>
+                                        <p className="text-[8px] font-bold" style={{ color: '#3b82f6' }}>Simetría Sagrada</p>
+                                        <p className="text-[7px] mt-0.5" style={{ color: txt2 }}>miércoles, 11 de marzo</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* 2 primary progress cards */}
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {[
-                                    { title: 'Matriz de Ritmos', sub: lang === 'es' ? 'Progreso de producci\u00f3n' : 'Production', value: '108.000 SF', meta: 'Meta: 150.000 SF', icon: Activity, color: '#3b82f6', pct: 72, desc: lang === 'es' ? 'D\u00edas de sol. El sistema respira tranquilo.' : 'System running steady.' },
-                                    { title: 'Fondo de Paz',     sub: lang === 'es' ? 'Amortizaci\u00f3n Prara Asia' : 'Amortization', value: '$15.000', meta: 'Meta: $40.000', icon: Shield, color: '#22c55e', pct: 37, desc: lang === 'es' ? 'Flujo activo. Reintegro constante.' : 'Active flow. Steady.' },
+                                    { title: 'Matriz de Ritmos', sub: lang === 'es' ? 'Progreso de producción' : 'Production', value: '108.000 SF', meta: 'Meta: 150.000 SF', icon: Activity, color: '#3b82f6', pct: 72, desc: lang === 'es' ? 'Días de sol. El sistema respira tranquilo.' : 'System running steady.' },
+                                    { title: 'Fondo de Paz',     sub: lang === 'es' ? 'Amortización Prara Asia' : 'Amortization', value: '$15.000', meta: 'Meta: $40.000', icon: Shield, color: '#22c55e', pct: 37, desc: lang === 'es' ? 'Flujo activo. Reintegro constante.' : 'Active flow. Steady.' },
                                 ].map((card, i) => (
                                     <div key={i} className={`rounded-xl border p-3 flex flex-col justify-between ${T}`} style={{ background: cardBg, borderColor: cardBdr, minHeight: '105px' }}>
                                         <div className="flex items-center gap-2 mb-1.5">
@@ -579,36 +579,36 @@ function AppMockup({ lang }: { lang: 'es' | 'en' | 'vn' }) {
                                         </div>
                                         <div>
                                             <div className="flex items-baseline justify-between mb-1">
-                                                <p className="text-[15px] font-black" style={{ color: txt0 }}>{card.value}</p>
-                                                <p className="text-[8px]" style={{ color: txt2 }}>{card.meta}</p>
+                                                <p className="text-[13px] sm:text-[15px] font-black" style={{ color: txt0 }}>{card.value}</p>
+                                                <p className="text-[7px] sm:text-[8px]" style={{ color: txt2 }}>{card.meta}</p>
                                             </div>
-                                            <div className="h-1 rounded-full mb-1.5" style={{ background: isDark ? '#3f3f46' : '#f1f5f9' }}>
+                                            <div className="h-1 rounded-full mb-1 sm:mb-1.5" style={{ background: isDark ? '#3f3f46' : '#f1f5f9' }}>
                                                 <div className="h-full rounded-full" style={{ width: `${card.pct}%`, background: card.color }} />
                                             </div>
-                                            <p className="text-[8px] leading-tight" style={{ color: txt2 }}>{card.desc}</p>
+                                            <p className="text-[7px] sm:text-[8px] leading-tight" style={{ color: txt2 }}>{card.desc}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
                             {/* 4 stat chips */}
-                            <div className="grid grid-cols-4 gap-1.5">
+                            <div className="flex overflow-x-auto sm:grid sm:grid-cols-4 gap-1.5 snap-x hide-scrollbar pb-1 sm:pb-0">
                                 {[
                                     { l: lang === 'es' ? 'SALDO CAJA' : 'CASH',     v: '$4.300',  tag: '+12%', up: true,  sub: 'EL PUNTO CERO',     Icon: DollarSign },
                                     { l: lang === 'es' ? 'SF PROCESADOS' : 'SF',    v: '108.000', tag: '88.2%', up: true,  sub: 'MATRIZ DE RITMOS',  Icon: Activity   },
-                                    { l: lang === 'es' ? 'N\u00d3MINA PEND.' : 'PAYROLL', v: '$8.200',  tag: '-5%',  up: false, sub: 'EL TEMPLO',         Icon: Users      },
+                                    { l: lang === 'es' ? 'NÓMINA PEND.' : 'PAYROLL', v: '$8.200',  tag: '-5%',  up: false, sub: 'EL TEMPLO',         Icon: Users      },
                                     { l: lang === 'es' ? 'AMORTIZ. PRARIA' : 'AMORT.', v: '$15.000', tag: '37%',   up: true,  sub: 'FONDO DE PAZ',      Icon: Package    },
                                 ].map((s, i) => (
-                                    <div key={i} className={`rounded-xl border p-2 ${T}`} style={{ background: cardBg, borderColor: cardBdr }}>
+                                    <div key={i} className={`shrink-0 w-[130px] snap-center sm:shrink sm:w-auto rounded-xl border p-2 ${T}`} style={{ background: cardBg, borderColor: cardBdr }}>
                                         <div className="flex items-start justify-between mb-1">
                                             <div className="w-4 h-4 rounded-md flex items-center justify-center" style={{ background: isDark ? '#27272a' : '#f1f5f9' }}>
                                                 <s.Icon size={9} style={{ color: txt2 }} />
                                             </div>
                                             <span className="text-[7px] font-black" style={{ color: s.up ? '#22c55e' : '#ef4444' }}>{s.tag}</span>
                                         </div>
-                                        <p className="text-[6px] font-bold uppercase tracking-wide leading-tight mb-0.5" style={{ color: txt2 }}>{s.l}</p>
-                                        <p className="text-[11px] font-black" style={{ color: txt0 }}>{s.v}</p>
-                                        <p className="text-[6px] uppercase font-black tracking-wide mt-0.5" style={{ color: txt2 }}>{s.sub}</p>
+                                        <p className="text-[6px] font-bold uppercase tracking-wide leading-tight mb-0.5 mt-1" style={{ color: txt2 }}>{s.l}</p>
+                                        <p className="text-[11px] sm:text-[11px] font-black" style={{ color: txt0 }}>{s.v}</p>
+                                        <p className="text-[6px] sm:hidden uppercase font-black tracking-wide mt-0.5 truncate" style={{ color: txt2 }}>{s.sub}</p>
                                     </div>
                                 ))}
                             </div>
@@ -631,11 +631,20 @@ function ClimateOrb({ active, clima }: { active: boolean; clima: { name: string;
                 'relative overflow-hidden rounded-[24px] border p-6 transition-all duration-500',
                 active
                     ? isRed
-                        ? 'border-red-400/40 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 shadow-lg shadow-red-500/10 scale-[1.02]'
-                        : 'border-blue-400/40 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 shadow-lg shadow-blue-500/10 scale-[1.02]'
+                        ? 'border-red-400/40 bg-gradient-to-br from-red-50 to-rose-50 shadow-lg shadow-red-500/10 scale-[1.02]'
+                        : 'border-blue-400/40 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg shadow-blue-500/10 scale-[1.02]'
                     : 'opacity-50'
             )}
-            style={!active ? { borderColor: 'var(--border)', background: 'var(--secondary)' } : {}}
+            style={
+                active
+                    ? {
+                          borderColor: isRed ? 'rgba(239, 68, 68, 0.4)' : 'rgba(37, 99, 235, 0.4)',
+                          background: isRed
+                              ? 'linear-gradient(135deg, color-mix(in srgb, var(--background), rgba(239,68,68,0.08)), color-mix(in srgb, var(--background), rgba(225,29,72,0.05)))'
+                              : 'linear-gradient(135deg, color-mix(in srgb, var(--background), rgba(37,99,235,0.08)), color-mix(in srgb, var(--background), rgba(79,70,229,0.05)))'
+                      }
+                    : { borderColor: 'var(--border)', background: 'var(--secondary)' }
+            }
         >
             {active && (
                 <motion.div
@@ -654,15 +663,16 @@ function ClimateOrb({ active, clima }: { active: boolean; clima: { name: string;
                 <div>
                     <p className={cn(
                         'text-[10px] font-black uppercase tracking-[0.3em] mb-1 font-mono',
-                        active ? (isRed ? 'text-red-500' : 'text-blue-600') : 'text-zinc-400'
-                    )}>
+                        active ? (isRed ? 'text-red-500' : 'text-blue-600') : ''
+                    )}
+                    style={!active ? { color: 'var(--muted-foreground)' } : {}}
+                    >
                         {clima.name}
                     </p>
                     <p
-                        className={cn(
-                            'text-sm font-medium leading-snug transition-colors',
-                            active ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'
-                        )}>
+                        className="text-sm font-medium leading-snug transition-colors"
+                        style={{ color: active ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+                    >
                         {clima.desc}
                     </p>
                 </div>
@@ -1200,13 +1210,13 @@ export default function LandingPage() {
                     {/* WebAuthn Badge */}
                     <FadeIn delay={0.3}>
                         <div className="text-center">
-                            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-zinc-50 border border-zinc-200">
-                                <div className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center">
+                            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-zinc-200/50 dark:bg-zinc-800/80 border border-zinc-300 dark:border-zinc-700">
+                                <div className="w-8 h-8 rounded-xl bg-zinc-900 dark:bg-zinc-950 flex items-center justify-center shrink-0">
                                     <Fingerprint size={16} className="text-white" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono">WebAuthn Standard</p>
-                                    <p className="text-sm font-bold text-zinc-900 dark:text-white">Biometric authentication · Zero passwords</p>
+                                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600 dark:text-zinc-400 font-mono">WebAuthn Standard</p>
+                                    <p className="text-sm font-bold text-black dark:text-white">Biometric authentication · Zero passwords</p>
                                 </div>
                             </div>
                         </div>

@@ -28,7 +28,7 @@ export function LoadingScreen({ onComplete }: { onComplete?: () => void }) {
 
     useEffect(() => {
         const startTime = Date.now()
-        const minDuration = 2500 // 2.5s for a more cinematic feel
+        const minDuration = 1500 // Balanced: fast enough for UX, long enough for cinematic logo log flow
 
         const interval = setInterval(() => {
             const elapsedTime = Date.now() - startTime

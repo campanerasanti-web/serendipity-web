@@ -9,6 +9,7 @@ import { OfflineSyncProvider } from '@/context/offline-sync-context'
 import { ChatProvider } from '@/context/chat-context'
 import { useEffect } from 'react'
 import { FinancialClimateManager } from '@/components/financial-climate-manager'
+import { ToastContainer } from '@/components/toast-container'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
@@ -25,6 +26,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <ConnectivityProvider>
                 <LanguageProvider>
                     <NotificationProvider>
+                        <ToastContainer />
                         <OfflineSyncProvider>
                             <FinancialClimateManager />
                             <AuthProvider>

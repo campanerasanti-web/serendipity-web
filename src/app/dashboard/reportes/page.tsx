@@ -43,8 +43,8 @@ export default function ReportesPage() {
             setAnalysisProgress(0)
             addNotification({
                 type: 'SUCCESS',
-                title: 'Análisis Completo',
-                message: 'Sophia ha detectado 3 patrones críticos en el flujo de caja operativo.'
+                title: t('reports.analysisComplete'),
+                message: t('reports.analysisSuccessMessage')
             })
         }, 4000)
     }
@@ -55,23 +55,23 @@ export default function ReportesPage() {
         
         addNotification({
             type: 'INFO',
-            title: 'Generando Reporte',
-            message: 'Estamos preparando tu documento de alta fidelidad...'
+            title: t('reports.generatingReport'),
+            message: t('reports.preparingDocument')
         })
 
         try {
             await promise
             addNotification({
                 type: 'SUCCESS',
-                title: 'Exportación Exitosa',
-                message: 'El reporte ha sido descargado en tu dispositivo.'
+                title: t('reports.exportSuccess'),
+                message: t('reports.exportSuccessMessage')
             })
         } catch (error) {
             console.error(error)
             addNotification({
                 type: 'ERROR',
-                title: 'Fallo de Exportación',
-                message: 'No pudimos generar el documento en este momento.'
+                title: t('reports.exportError'),
+                message: t('reports.exportErrorMessage')
             })
         } finally {
             setIsExporting(false)
@@ -136,28 +136,30 @@ export default function ReportesPage() {
                     </h1>
                     <p className="text-[var(--muted-foreground)] text-base font-medium">{t('reports.subtitle')}</p>
                 </div>
-                <div className="flex gap-4 no-export">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 no-export mt-4 lg:mt-0 w-full lg:w-auto justify-start lg:justify-end">
                     <DateRangePicker
                         date={date}
                         onDateChange={setDate}
                         align="right"
-                        className="h-10 shadow-sm [&_button]:h-10"
+                        className="h-10 shadow-sm w-full sm:w-auto [&_button]:h-10"
                     />
-                    <Button
-                        variant="secondary"
-                        onClick={handleCSVExport}
-                        className="rounded-[16px] font-medium text-[13px] px-5 h-10 shadow-sm transition-all flex items-center gap-2 bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]"
-                    >
-                        <FileText size={16} /> CSV
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        onClick={handleExport}
-                        disabled={isExporting}
-                        className="rounded-[16px] font-medium text-[13px] px-5 h-10 shadow-sm transition-all flex items-center gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90"
-                    >
-                        <Download size={16} /> {isExporting ? 'Exportando...' : 'PDF'}
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                        <Button
+                            variant="secondary"
+                            onClick={handleCSVExport}
+                            className="flex-1 sm:flex-none rounded-[16px] font-medium text-[13px] px-5 h-10 shadow-sm transition-all flex items-center justify-center gap-2 bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]"
+                        >
+                            <FileText size={16} /> CSV
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            className="flex-1 sm:flex-none rounded-[16px] font-medium text-[13px] px-5 h-10 shadow-sm transition-all flex items-center justify-center gap-2 bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--foreground)]/90"
+                        >
+                            <Download size={16} /> {isExporting ? 'Exportando...' : 'PDF'}
+                        </Button>
+                    </div>
                 </div>
             </div>
 

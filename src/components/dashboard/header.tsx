@@ -108,10 +108,10 @@ export function Header({
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div
                             key={isSidebarOpen ? 'close' : 'menu'}
-                            initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
-                            animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                            exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.12, ease: "easeOut" }}
                         >
                             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
                         </motion.div>
@@ -269,7 +269,7 @@ export function Header({
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="p-2 max-h-80 overflow-y-auto">
+                                    <div className="p-2 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--border)] scrollbar-track-transparent">
                                         {alerts.length === 0 ? (
                                             <div className="flex flex-col items-center justify-center py-10 text-[var(--muted-foreground)]">
                                                 <Bell size={28} className="mb-3 opacity-30" />
@@ -282,23 +282,38 @@ export function Header({
                                                     onClick={() => {
                                                         if (alert.actionUrl) {
                                                             router.push(alert.actionUrl)
-                                                            setIsAlertsOpen(false)
+                                                        } else {
+                                                            router.push('/dashboard/notificaciones')
                                                         }
+                                                        setIsAlertsOpen(false)
                                                     }}
                                                     className="flex items-start gap-3 px-3 py-3 rounded-[14px] hover:bg-[var(--secondary)] cursor-pointer"
                                                 >
                                                     <div className={cn(
-                                                        "w-2 h-2 rounded-full mt-1.5 shrink-0",
-                                                        alert.critical ? "bg-red-500" : "bg-blue-500"
+                                                        "w-2 h-2 rounded-full mt-1.5 shrink-0 shadow-sm",
+                                                        alert.critical ? "bg-red-500 shadow-red-500/50" : "bg-blue-500 shadow-blue-500/50"
                                                     )} />
                                                     <div>
-                                                        <p className="text-sm font-semibold text-[var(--foreground)]">{alert.title ?? 'Alerta'}</p>
-                                                        <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{alert.message}</p>
+                                                        <p className="text-sm font-semibold text-[var(--foreground)] leading-snug">{alert.title ?? 'Alerta'}</p>
+                                                        <p className="text-xs text-[var(--muted-foreground)] mt-1 opacity-90 leading-relaxed">{alert.message}</p>
                                                     </div>
                                                 </div>
                                             ))
                                         )}
                                     </div>
+                                    {alerts.length > 0 && (
+                                        <div className="p-3 border-t border-[var(--border)] bg-[var(--secondary)]/30 text-center">
+                                            <button 
+                                                onClick={() => {
+                                                    router.push('/dashboard/notificaciones')
+                                                    setIsAlertsOpen(false)
+                                                }} 
+                                                className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors uppercase tracking-widest w-full py-2 hover:bg-blue-500/10 rounded-lg cursor-pointer"
+                                            >
+                                                Ver Todo el Historial
+                                            </button>
+                                        </div>
+                                    )}
                                 </motion.div>
                             </>
                         )}

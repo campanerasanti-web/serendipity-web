@@ -335,7 +335,7 @@ export default function RegisterPage({ forcedAdmin }: { forcedAdmin?: boolean })
                                 </Link>
                             </p>
 
-                            <Link href="/landing">
+                            <Link href="/">
                                 <Button variant="ghost" size="sm" className="!rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
                                     <ChevronLeft size={14} className="mr-1" /> {t('common.backToStart') || 'Back to Start'}
                                 </Button>

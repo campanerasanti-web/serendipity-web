@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { startRegistration } from '@simplewebauthn/browser'
 import { Card, Button, Badge } from '@/components/ui-library'
 import { Fingerprint, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { useNotifications } from '@/context/notification-context'
 import { createClient } from '@/lib/supabase/client'
 
 export function BiometricSettings() {
+    const { addNotification } = useNotifications()
     const [isRegistering, setIsRegistering] = useState(false)
 
     const handleRegisterFingerprint = async () => {
@@ -18,7 +19,7 @@ export function BiometricSettings() {
             const { data: { session } } = await supabase.auth.getSession()
 
             if (!session) {
-                toast.error('Sesión no encontrada')
+                addNotification({ type: 'ERROR', title: 'Error', message: 'Sesión no encontrada' })
                 return
             }
 
@@ -51,14 +52,14 @@ export function BiometricSettings() {
             const verification = await verificationRes.json()
 
             if (verification.verified) {
-                toast.success('¡Huella registrada exitosamente!')
+                addNotification({ type: 'SUCCESS', title: 'Éxito', message: '¡Huella registrada exitosamente!' })
             } else {
-                toast.error(`Error de verificación: ${verification.error || 'Desconocido'}`)
+                addNotification({ type: 'ERROR', title: 'Error', message: `Error de verificación: ${verification.error || 'Desconocido'}` })
             }
 
         } catch (error: any) {
             console.error(error)
-            toast.error(error.message || 'Error al registrar huella')
+            addNotification({ type: 'ERROR', title: 'Error', message: error.message || 'Error al registrar huella' })
         } finally {
             setIsRegistering(false)
         }

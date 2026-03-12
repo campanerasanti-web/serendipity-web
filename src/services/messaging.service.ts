@@ -13,7 +13,7 @@ export interface Message {
 }
 
 export const MessagingService = {
-    async getMessages(userId: string) {
+    async getMessages(userId: string, limit: number = 50) {
         const supabase = createClient();
         if (!supabase) return [];
 
@@ -25,10 +25,34 @@ export const MessagingService = {
                 receiver:receiver_id(name, role)
             `)
             .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(limit);
 
         if (error) {
             console.error('Error fetching messages:', error);
+            return [];
+        }
+
+        return data as Message[];
+    },
+
+    async getChatMessages(userId: string, otherId: string, limit: number = 20, offset: number = 0) {
+        const supabase = createClient();
+        if (!supabase) return [];
+
+        const { data, error } = await supabase
+            .from('messages')
+            .select(`
+                *,
+                sender:sender_id(name, role),
+                receiver:receiver_id(name, role)
+            `)
+            .or(`and(sender_id.eq.${userId},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${userId})`)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) {
+            console.error('Error fetching chat messages:', error);
             return [];
         }
 

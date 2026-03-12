@@ -236,8 +236,8 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Chart Area */}
                 <div className="lg:col-span-8 space-y-8">
-                    <Card className="p-10 border-none ring-1 ring-[var(--border)] shadow-sm">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-12 gap-6">
+                    <Card className="p-6 sm:p-10 border-none ring-1 ring-[var(--border)] shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-12 gap-6">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-blue-500/10 text-blue-500 rounded-2xl">
                                     <TrendingUp size={24} />
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                                     <p className="text-sm text-[var(--muted-foreground)] font-medium">{t('dashboard.dailyProfitMargin')}</p>
                                 </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap sm:flex-nowrap gap-2">
                                 <Button
                                     variant={activeRange === 7 ? "secondary" : "ghost"}
                                     size="sm"
@@ -273,7 +273,8 @@ export default function DashboardPage() {
                                 <DateRangePicker
                                     date={date}
                                     onDateChange={(d) => { setDate(d); setActiveRange(null); }}
-                                    className="h-10 shadow-sm [&_button]:h-10"
+                                    className="h-10 shadow-sm w-full sm:w-auto [&_button]:h-10"
+                                    align="right"
                                 />
                             </div>
                         </div>

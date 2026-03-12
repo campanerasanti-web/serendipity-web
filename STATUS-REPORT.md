@@ -1,6 +1,6 @@
 # 📊 Checklist de Estado - Serendipity Anthropos OS
 
-**Fecha de Evaluación:** 11 de Marzo de 2026  
+**Fecha de Evaluación:** 12 de Marzo de 2026  
 **Proyecto:** Serendipity Anthropos OS  
 **Estado General:** 🚀 **Lanzamiento Completado / Puesta en Producción**
 
@@ -11,39 +11,44 @@
 ### ✅ Completado (HECHO)
 - [x] **Sistema de Autenticación Premium:** Diseño tipo *split-layout* con soporte para Password y OTP.
 - [x] **Acceso Biométrico:** Flujo completo de Huella/FaceID (Resuelto bug de loop en móviles).
-- [x] **Página de Inicio Predeterminada (/):** La landing page ahora es el entry point principal.
+- [x] **Protocolos de Seguridad (El Templo):** Implementación de **Doble Factor de Autenticación (2FA)** y **Tiempo de Sesión (Inactividad)** configurable.
+- [x] **Módulo de Mensajería Directa:** Interfaz inspirada en WhatsApp con sidebar de chats, persistencia real y burbujas adaptativas.
+- [x] **Acceso Global de Chat:** Botón flotante persistente que abre la mensajería en un modal premium desde cualquier página.
+- [x] **Optimización Móvil Premium:** Modal de chat adaptativo con bordes suavizados (Curvatura orgánica) y modo pantalla completa inteligente.
+- [x] **Refinamiento de Pantalla Cero:** Selector de rango de fechas unificado y optimizado para responsive (Full-width en móvil).
+- [x] **Internationalization (i18n):** Traducción completa de todos los módulos. Eliminación de etiquetas residuales "common" y corrección de llaves técnicas (2FA).
+- [x] **Notificaciones de Vanguardia:** Overhaul completo con `ToastContainer` (glassmorphism), filtrado inteligente de alertas MFA y persistencia en historial detallado.
+- [x] **Mejoras de Feedback:** Notificaciones localizadas para login, 2FA y cambios en la matriz del sistema.
+- [x] **Diseño Visual Sophia:** Actualización de títulos en el widget de mensajería para una estética más ligera ("Simetría Directa").
+- [x] **Jardín de Datos (Inteligencia):** Funcionalidad real de exportación a **PDF** y **CSV** con retroalimentación visual.
+- [x] **Análisis de Sophia (Simulación):** Proceso de análisis profundo con barra de progreso y resultados basados en patrones de caja.
+- [x] **Auditoría de Historial:** Modal de auditoría funcional para rastrear movimientos recientes de la plataforma.
 - [x] **Landing Page Premium:** Diseño cinematográfico con efecto *Glassmorphism* y gradientes dinámicos.
-- [x] **Mockup Panoramic OS (16:9):** Representación fiel del sistema con proporción panorámica adaptativa (Móvil/Desktop).
 - [x] **Navegación Fluida (Lenis):** Implementación de *Smooth Scroll* inercial de alta gama optimizado para GPU.
-- [x] **Optimización de Scroll:** Eliminación de lags y stutters mediante reducción de filtros pesados y aceleración por hardware.
-- [x] **Interactividad en Mockup:** Sidebar funcional, cambio de estados de clima dinámico y modo oscuro independiente.
-- [x] **Legibilidad Inteligente:** Colores de texto adaptativos (Climas adaptados a fondos dinámicos en ambos modos).
-- [x] **Optimización de Despliegue:** Resolución de conflictos de dependencias para React 19 en Vercel (npmrc fix).
-- [x] **Dashboard Core:** Layout principal, sidebar interactivo y Header.
-- [x] **Módulo de Finanzas & Operaciones:** Datos reales cargados desde Supabase (Adiós Mocks).
-- [x] **Módulo Sophia:** Interfaz de chat premium con orquestación de agentes y reportes PDF.
-- [x] **Modo Offline Inteligente:** Cola de acciones distribuida y persistencia en IndexedDB.
+- [x] **Acceso Multi-Rol:** Sección de configuración ("El Templo") accesible ahora para roles SUPERVISOR y ADMIN.
 
 ### 🚧 Pendiente / En Mejora
-- [ ] **Feedback de Usuarios Reales:** Recolectar impresiones sobre la velocidad del scroll en dispositivos de gama baja.
+- [x] **Optimización de Carga de Mensajes:** Implementación de *infinite scroll* y paginación para chats con historiales extensos, manteniendo un rendimiento fluido.
 
 ---
 
 ## ⚙️ BACKEND y SERVICIOS (Lógica y Datos)
 
 ### ✅ Completado (HECHO)
-- [x] **Servicio de Dashboard:** Sumarización de métricas en tiempo real.
-- [x] **API WebAuthn:** Rutas de generación y verificación de retos criptográficos.
+- [x] **Sincronización Realtime (Supabase):** Implementación de canales de escucha dinámica para que los mensajes aparezcan instantáneamente sin polling.
+- [x] **Persistencia de Configuración:** Tabla `system_settings` centralizada para metas, 2FA y timeouts.
+- [x] **Seguridad RLS:** Políticas de Row Level Security para garantizar privacidad total en chats y mensajes.
+- [x] **Servicio de Auditoría:** Registro persistente de eventos de sistema y accesos de usuario.
+- [x] **API WebAuthn:** Rutas de generación y verificación de retos criptográficos para biometría.
 - [x] **Arquitectura de Micro-Agentes:** Sophia se comunica con Agente Financiero, Operativo y Sagrario.
-- [x] **Memoria Histórica:** Sophia tiene acceso a "leer" la base de conocimientos del Sagrario (RAG).
-- [x] **Gestión de Usuarios (Admin API):** Bypass de RLS para administración interna segura.
+- [x] **Memoria Histórica RAG:** Sophia tiene acceso a la base de conocimientos del Sagrario.
 
 ### 🚧 Pendiente / En Mejora
-- [ ] **Monitoreo de Edge Functions:** Observar tiempos de respuesta de las APIs de Biometría en producción.
+- [ ] **Pruebas de Carga Realtime:** Verificar estabilidad de la conexión con +10 agentes simultáneos en el mismo canal.
 
 ---
 
 ## 💡 Próximos Pasos (Opcionales)
-1. 🛠️ **Monitoreo en Producción:** Observar métricas en Vercel y logs de Supabase.
-2. 📱 **QA de Integridad UI:** Verificación continua en nuevos modelos de dispositivos móviles.
-3. 🔒 **Auditoría de RLS:** Mantener la revisión de políticas a medida que se agreguen nuevos roles.
+1. 🛠️ **Monitoreo de Seguridad:** Supervisar los intentos de login y el uso de las 2FA en producción.
+2. 📱 **QA de Chat:** Verificar la disposición de las burbujas de mensaje en pantallas ultra-pequeñas.
+3. 🔒 **Expansión de Auditoría:** Añadir más eventos críticos (cambios en settings financieros) al log de auditoría.

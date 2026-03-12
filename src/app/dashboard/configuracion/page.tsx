@@ -8,7 +8,7 @@ import { useTranslation } from '@/context/language-context'
 
 import { useSettings } from '@/hooks/use-settings'
 import { useUsers } from '@/hooks/use-users'
-import { toast } from 'sonner'
+import { useNotifications } from '@/context/notification-context'
 import { BiometricSettings } from '@/components/settings/biometric-settings'
 
 import { useAuth } from '@/context/auth-context'
@@ -17,6 +17,7 @@ export default function ConfiguracionPage() {
     const { t } = useTranslation()
     const { settings, updateSettings, updateNestedSetting } = useSettings()
     const { users, loading: loadingUsers, updateUserRole, createUser, deleteUser } = useUsers()
+    const { addNotification } = useNotifications()
     const { user: currentUser } = useAuth()
     const isAdmin = currentUser?.role === 'ADMIN'
     const [activeTab, setActiveTab] = useState(isAdmin ? 'GLOBAL' : 'SECURITY')
@@ -32,24 +33,26 @@ export default function ConfiguracionPage() {
         const res = await createUser(newUser)
         setIsCreating(false)
         if (res.success) {
-            toast.success(t('temple.userCreated'))
+            addNotification({ type: 'SUCCESS', title: t('temple.userCreated'), message: t('temple.userCreated') })
             setShowCreateForm(false)
             setNewUser({ name: '', email: '', password: '', role: 'OPERATIVO' })
         } else {
-            toast.error(res.error || "Error")
+            addNotification({ type: 'ERROR', title: 'Error', message: res.error || "Error" })
         }
     }
 
     const handleDeleteUser = async (userId: string) => {
         if (!confirm(t('temple.confirmDelete'))) return
         const res = await deleteUser(userId)
-        if (res.success) toast.success(t('temple.userDeleted'))
-        else toast.error(res.error || "Error")
+        if (res.success) addNotification({ type: 'SUCCESS', title: t('temple.userDeleted'), message: t('temple.userDeleted') })
+        else addNotification({ type: 'ERROR', title: 'Error', message: res.error || "Error" })
     }
 
     const handleSave = () => {
-        toast.success(t('common.success'), {
-            description: t('temple.updatedSuccess')
+        addNotification({
+            type: 'SUCCESS',
+            title: t('common.success'),
+            message: t('temple.updatedSuccess')
         })
     }
 
@@ -195,22 +198,22 @@ export default function ConfiguracionPage() {
                                         { n: t('temple.adminEmail'), i: Mail, s: settings.notifications.email, desc: t('temple.adminEmailDesc') },
                                         { n: t('temple.pushNotifications'), i: Bell, s: settings.notifications.push, desc: t('temple.pushNotificationsDesc') },
                                     ].map(ch => (
-                                        <div key={ch.n} className="flex items-center justify-between p-6 rounded-[20px] bg-[var(--secondary)]/30 border border-[var(--border)] transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-3 bg-[var(--card)] rounded-xl border border-[var(--border)]">
+                                        <div key={ch.n} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 sm:p-6 rounded-[20px] bg-[var(--secondary)]/30 border border-[var(--border)] transition-all gap-4 sm:gap-0">
+                                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                                                <div className="p-3 bg-[var(--card)] rounded-xl border border-[var(--border)] shrink-0">
                                                     <ch.i size={20} className={ch.s ? "text-blue-500" : "text-[var(--muted-foreground)]"} />
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-bold">{ch.n}</p>
-                                                    <p className="text-xs text-[var(--muted-foreground)]">{ch.desc}</p>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-bold truncate">{ch.n}</p>
+                                                    <p className="text-xs text-[var(--muted-foreground)] line-clamp-2">{ch.desc}</p>
                                                 </div>
                                             </div>
                                             <Button
                                                 variant={ch.s ? "secondary" : "ghost"}
                                                 size="sm"
-                                                className="font-bold"
+                                                className="font-bold w-full sm:w-auto mt-2 sm:mt-0"
                                                 onClick={() => {
-                                                    const key = ch.n.includes('Slack') ? 'slack' : ch.n.includes('Mail') || ch.n.includes('Email') ? 'email' : 'push';
+                                                    const key = ch.n.includes('Slack') ? 'slack' : ch.n.includes('Mail') || ch.n.includes('Email') || ch.n.includes('Correo') ? 'email' : 'push';
                                                     updateNestedSetting('notifications', { [key]: !ch.s });
                                                 }}
                                             >
@@ -235,7 +238,10 @@ export default function ConfiguracionPage() {
                                         <div className="space-y-4">
                                             <Lock size={20} className="text-amber-500" />
                                             <h4 className="font-bold text-sm">{t('temple.twoFactorAuth')}</h4>
-                                            <p className="text-xs text-[var(--muted-foreground)]">{t('temple.twoFactorAuthDesc')}</p>
+                                            <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                                                {t('temple.twoFactorAuthDesc')}
+                                                <br /><span className="font-bold opacity-80 mt-1 block">{t('temple.twoFactorFrequency')}</span>
+                                            </p>
                                         </div>
                                         <div className="flex items-center justify-between pt-2">
                                             <Badge variant={settings.security.twoFactorEnabled ? "success" : "default"}>
@@ -308,17 +314,15 @@ export default function ConfiguracionPage() {
                     {activeTab === 'USERS' && (
                         <section className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <div className="space-y-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="font-bold text-xl tracking-tight text-[var(--foreground)]">{t('common.permissions')}</h3>
-                                        <Button 
-                                            variant={showCreateForm ? "ghost" : "primary"} 
-                                            size="sm" 
-                                            onClick={() => setShowCreateForm(!showCreateForm)}
-                                        >
-                                            {showCreateForm ? t('common.backToStart') : t('temple.createUser')}
-                                        </Button>
-                                    </div>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-bold text-xl tracking-tight text-[var(--foreground)]">{t('temple.roles')}</h3>
+                                    <Button 
+                                        variant={showCreateForm ? "ghost" : "primary"} 
+                                        size="sm" 
+                                        onClick={() => setShowCreateForm(!showCreateForm)}
+                                    >
+                                        {showCreateForm ? t('common.backToStart') : t('temple.createUser')}
+                                    </Button>
                                 </div>
 
                                 {showCreateForm && (
@@ -392,8 +396,8 @@ export default function ConfiguracionPage() {
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full lg:w-auto">
-                                                    <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-xl mr-2">
+                                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full lg:w-auto mt-4 lg:mt-0">
+                                                    <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-xl mr-2 overflow-x-auto scrollbar-hide w-full sm:w-auto justify-center sm:justify-start">
                                                         {(['ADMIN', 'SUPERVISOR', 'OPERATIVO'] as const).map(role => (
                                                             <button
                                                                 key={role}
@@ -405,12 +409,12 @@ export default function ConfiguracionPage() {
                                                                 )}
                                                                 onClick={async () => {
                                                                     if (user.id === currentUser?.id) {
-                                                                        toast.error("No puedes cambiar tu propio rol");
+                                                                        addNotification({ type: 'ERROR', title: 'Bloqueado', message: "No puedes cambiar tu propio rol" });
                                                                         return;
                                                                     }
                                                                     const res = await updateUserRole(user.id, role);
-                                                                    if (res.success) toast.success("Rol actualizado");
-                                                                    else toast.error("Error al actualizar");
+                                                                    if (res.success) addNotification({ type: 'SUCCESS', title: 'Éxito', message: "Rol actualizado" });
+                                                                    else addNotification({ type: 'ERROR', title: 'Error', message: "Error al actualizar" });
                                                                 }}
                                                             >
                                                                 {role}
