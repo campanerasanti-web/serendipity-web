@@ -32,8 +32,37 @@ class ClaudeProvider implements AIProvider {
 }
 
 class GroqProvider implements AIProvider {
+    private apiKey: string;
+    private model: string;
+
+    constructor(apiKey: string, model = 'llama-3.3-70b-versatile') {
+        this.apiKey = apiKey;
+        this.model = model;
+    }
+
     async generateResponse(systemPrompt: string, userPrompt: string): Promise<string> {
-        throw new Error("Groq API no implementada todavía. (Preparado para el futuro)");
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${this.apiKey}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "model": this.model,
+                "messages": [
+                    { "role": "system", "content": systemPrompt },
+                    { "role": "user", "content": userPrompt }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(`Groq Error: ${error.error?.message || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
     }
 }
 
@@ -80,27 +109,28 @@ class OpenRouterProvider implements AIProvider {
 
 // Factoría de IA
 function getAIProvider(providerName: string): AIProvider {
+    const groqKey = process.env.GROQ_API_KEY;
     const openRouterKey = process.env.OPEN_ROUTER_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY || 
                      process.env.NEXT_PUBLIC_AI_API_KEY ||
                      process.env.GOOGLE_API_KEY ||
                      process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
-    // Prioridad 1: Si el proveedor es OpenRouter y hay llave, usarlo.
-    if (providerName.toLowerCase() === 'openrouter' && openRouterKey) {
-        return new OpenRouterProvider(openRouterKey);
+    switch (providerName.toLowerCase()) {
+        case 'groq':
+            if (!groqKey) throw new Error("API Key de Groq no configurada");
+            return new GroqProvider(groqKey);
+        case 'openrouter':
+            if (!openRouterKey) throw new Error("API Key de OpenRouter no configurada");
+            return new OpenRouterProvider(openRouterKey);
+        case 'gemini':
+            if (!geminiKey) throw new Error("API Key de Gemini no configurada");
+            return new GeminiProvider(geminiKey);
+        default:
+            // Este default lo manejamos en el loop de fallback del POST
+            if (groqKey) return new GroqProvider(groqKey);
+            throw new Error("No hay proveedores configurados");
     }
-
-    // Prioridad 2: Si el proveedor es Gemini y hay llave, usarlo.
-    if (providerName.toLowerCase() === 'gemini' && geminiKey) {
-        return new GeminiProvider(geminiKey);
-    }
-
-    // Fallback: Si no se especifica o falla el anterior, intentar OpenRouter -> Gemini -> Error
-    if (openRouterKey) return new OpenRouterProvider(openRouterKey);
-    if (geminiKey) return new GeminiProvider(geminiKey);
-
-    throw new Error("No se encontró ninguna API Key válida para Sophia (GEMINI o OPENROUTER)");
 }
 
 // 4. Extractor de Contexto Profundo desde BD
@@ -220,37 +250,44 @@ export async function POST(request: Request) {
             RESPUESTA SIEMPRE EN ESPAÑOL. Usa negritas para resaltar métricas y cifras clave.
         `;
 
-        const providerName = process.env.ACTIVE_AI_PROVIDER || 'gemini'; 
+        // ESTRATEGIA DE FALLBACK EN CASCADA (Resiliencia Total)
+        const providersToTry = ['groq', 'openrouter', 'gemini'];
+        const errors: string[] = [];
         
-        try {
-            const aiProvider = getAIProvider(providerName);
-            const responseText = await aiProvider.generateResponse(systemPrompt, query);
-            
-            let source = 'PROCESS';
-            const q = query.toLowerCase();
-            if (q.includes('caja') || q.includes('dinero') || q.includes('financ') || q.includes('fondo') || q.includes('deuda')) source = 'FINANCE';
-            else if (q.includes('lote') || q.includes('produccion') || q.includes('estacion') || q.includes('operacion') || q.includes('rojo')) source = 'OPERATIONS';
+        for (const provider of providersToTry) {
+            try {
+                const aiProvider = getAIProvider(provider);
+                const responseText = await aiProvider.generateResponse(systemPrompt, query);
+                
+                let source = 'PROCESS';
+                const q = query.toLowerCase();
+                if (q.includes('caja') || q.includes('dinero') || q.includes('financ') || q.includes('fondo') || q.includes('deuda')) source = 'FINANCE';
+                else if (q.includes('lote') || q.includes('produccion') || q.includes('estacion') || q.includes('operacion') || q.includes('rojo')) source = 'OPERATIONS';
 
-            return NextResponse.json({
-                id: Math.random().toString(36).substr(2, 9),
-                role: 'sophia',
-                content: responseText,
-                timestamp: new Date().toISOString(),
-                agentSource: source
-            });
-
-        } catch (apiEx: any) {
-            console.error("Sophia AI Provider Error:", apiEx);
-            const mockResponse = getAdvancedMock(query, quickContext);
-            // Si hay un error real de la API o de configuración, lo incluimos discretamente para reporte
-            if (process.env.NODE_ENV !== 'production' || query.includes('DEBUG_AI')) {
-                mockResponse.content += `\n\n*Nota Técnica: ${apiEx.message || 'Error desconocido de proveedor'}*`;
+                return NextResponse.json({
+                    id: Math.random().toString(36).substr(2, 9),
+                    role: 'sophia',
+                    content: responseText,
+                    timestamp: new Date().toISOString(),
+                    agentSource: source,
+                    provider: provider // Para saber quién respondió
+                });
+            } catch (ex: any) {
+                console.warn(`Provider ${provider} falló:`, ex.message);
+                errors.push(`${provider}: ${ex.message}`);
+                continue; // Intentar el siguiente
             }
-            return NextResponse.json(mockResponse);
         }
 
+        // Si todos fallan, usar el Mock
+        const mockResponse = getAdvancedMock(query, quickContext);
+        if (process.env.NODE_ENV !== 'production' || query.includes('DEBUG_AI')) {
+            mockResponse.content += `\n\n*Nota Técnica (Fallo en Cascada):*\n${errors.join('\n')}`;
+        }
+        return NextResponse.json(mockResponse);
+
     } catch (error: any) {
-        console.error('Sophia Request Error:', error);
+        console.error('Sophia Critical Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
