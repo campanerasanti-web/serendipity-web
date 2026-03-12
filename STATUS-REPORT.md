@@ -11,7 +11,8 @@
 ### ✅ Completado (HECHO)
 - [x] **Sistema de Autenticación Premium:** Diseño tipo *split-layout* con soporte para Password y OTP.
 - [x] **Acceso Biométrico:** Flujo completo de Huella/FaceID (Resuelto bug de loop en móviles).
-- [x] **Protocolos de Seguridad (El Templo):** Implementación de **Doble Factor de Autenticación (2FA)** y **Tiempo de Sesión (Inactividad)** configurable.
+- [x] **Protocolos de Seguridad (El Templo):** Doble Factor de Autenticación (2FA) ahora **Desactivado por defecto** para facilitar el alta de nuevos usuarios, y configurable en "El Templo".
+- [x] **Sesiones Resilientes:** Tiempos de sesión configurables para equilibrio entre seguridad y comodidad.
 - [x] **Módulo de Mensajería Directa:** Interfaz inspirada en WhatsApp con sidebar de chats, persistencia real y burbujas adaptativas.
 - [x] **Acceso Global de Chat:** Botón flotante persistente que abre la mensajería en un modal premium desde cualquier página.
 - [x] **Optimización Móvil Premium:** Modal de chat adaptativo con bordes suavizados (Curvatura orgánica) y modo pantalla completa inteligente.
@@ -40,8 +41,8 @@
 - [x] **Seguridad RLS:** Políticas de Row Level Security para garantizar privacidad total en chats y mensajes.
 - [x] **Servicio de Auditoría:** Registro persistente de eventos de sistema y accesos de usuario.
 - [x] **API WebAuthn:** Rutas de generación y verificación de retos criptográficos para biometría.
-- [x] **Arquitectura de Micro-Agentes:** Sophia se comunica con Agente Financiero, Operativo y Sagrario.
-- [x] **Memoria Histórica RAG:** Sophia tiene acceso a la base de conocimientos del Sagrario.
+- [x] **Cerebro Resiliente Sophia:** Implementación de arquitectura local/nube con **Estrategia en Cascada** (Groq -> OpenRouter -> Gemini) para asegurar disponibilidad del 100%.
+- [x] **Memoria Histórica RAG:** Sophia tiene acceso a la base de conocimientos del Sagrario mediante búsqueda vectorial (PgVector).
 
 ### 🚧 Pendiente / En Mejora
 - [ ] **Pruebas de Carga Realtime:** Verificar estabilidad de la conexión con +10 agentes simultáneos en el mismo canal.

@@ -12,9 +12,11 @@ export class VaultService {
         }
     }
 
-    static async uploadDocument(file: File): Promise<VaultDocument> {
+    static async uploadDocuments(files: File[]): Promise<any> {
         const formData = new FormData();
-        formData.append('file', file);
+        files.forEach(file => {
+            formData.append('files', file);
+        });
 
         const res = await fetch('/api/vault/parse', {
             method: 'POST',
@@ -23,23 +25,12 @@ export class VaultService {
 
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.error || 'Failed to parse document');
+            throw new Error(err.error || 'Failed to parse documents');
         }
 
-        const data = await res.json();
-        
-        // El backend devuelve el documentId y el texto.
-        // Volvemos a obtener la lista para tener el objeto completo o construimos uno temporal.
-        return {
-            id: data.documentId,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedAt: new Date().toISOString(),
-            encrypted: true,
-            status: 'READY'
-        };
+        return await res.json();
     }
+
 
     static async deleteDocument(id: string): Promise<void> {
         const res = await fetch(`/api/vault?id=${id}`, {

@@ -76,16 +76,19 @@ export function useSophia() {
         }
     };
 
-    const uploadToVault = async (file: File) => {
+    const uploadToVault = async (files: File[]) => {
         setIsUploading(true);
         try {
-            const newDoc = await VaultService.uploadDocument(file);
-            setVaultDocs(prev => [newDoc, ...prev]);
-            return newDoc;
+            const response = await VaultService.uploadDocuments(files);
+            // Refresh list from server to get clean state
+            const docs = await VaultService.getDocuments();
+            setVaultDocs(docs);
+            return response;
         } finally {
             setIsUploading(false);
         }
     };
+
 
     const deleteFromVault = async (id: string) => {
         try {

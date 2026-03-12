@@ -78,15 +78,15 @@ export default function SophiaPage() {
     }
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
+        const files = Array.from(e.target.files || [])
+        if (files.length === 0) return
 
         try {
-            const doc = await uploadToVault(file)
+            const result = await uploadToVault(files)
             addNotification({
                 type: 'SUCCESS',
                 title: t('sophia.vault.saved'),
-                message: `${doc.name} ${t('sophia.vault.encryptionActive')}`
+                message: result.summary || `${files.length} archivos subidos con éxito.`
             })
         } catch (error) {
             addNotification({
@@ -364,14 +364,15 @@ export default function SophiaPage() {
                                         </div>
                                         <div className="relative z-10">
                                             <h4 className="font-bold text-[var(--foreground)] text-sm tracking-tight mb-1.5 transition-colors group-hover:text-blue-600">{t('sophia.vault.uploadDoc')}</h4>
-                                            <p className="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-widest opacity-80">PDF, TXT, JSON (Max 5MB)</p>
+                                            <p className="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-widest opacity-80">PDF, TXT, JSON • ALTA CAPACIDAD</p>
                                         </div>
                                         <input
                                             type="file"
                                             ref={fileInputRef}
                                             className="hidden"
                                             onChange={handleFileUpload}
-                                            accept=".pdf,.txt,.json,.docx"
+                                            accept=".pdf,.txt,.json"
+                                            multiple
                                         />
                                     </Card>
 
