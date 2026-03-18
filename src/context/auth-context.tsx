@@ -99,10 +99,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = async (email: string, password: string, name: string, role: UserRole) => {
         if (!supabase) throw new Error('Supabase Client not initialized')
 
+        // Always use the production URL for email redirects.
+        // NEVER use window.location.origin here — it would point to localhost
+        // when an admin creates accounts from their local environment.
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://serendipity-web.vercel.app'
         const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
+                emailRedirectTo: `${siteUrl}/login`,
                 data: {
                     name,
                     role
