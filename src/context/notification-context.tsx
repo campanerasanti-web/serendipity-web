@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react'
 
 export type NotificationType = 'SUCCESS' | 'ERROR' | 'INFO' | 'WARNING' | 'CRITICAL'
 
@@ -24,9 +24,34 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
+const LOCAL_STORAGE_KEY = 'appNotifications'
+
+// Function to get initial notifications from localStorage
+const getInitialNotifications = (): AppNotification[] => {
+    if (typeof window !== 'undefined') {
+        const storedNotifications = localStorage.getItem(LOCAL_STORAGE_KEY)
+        if (storedNotifications) {
+            try {
+                return JSON.parse(storedNotifications) as AppNotification[]
+            } catch (e) {
+                console.error("Failed to parse notifications from localStorage", e)
+                return []
+            }
+        }
+    }
+    return []
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
-    const [notifications, setNotifications] = useState<AppNotification[]>([])
+    const [notifications, setNotifications] = useState<AppNotification[]>(getInitialNotifications())
     const [lastAddedId, setLastAddedId] = useState<string | null>(null)
+
+    // Effect to save notifications to localStorage whenever they change
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(notifications))
+        }
+    }, [notifications])
 
     const addNotification = useCallback((params: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => {
         const id = Math.random().toString(36).substring(2, 11)
