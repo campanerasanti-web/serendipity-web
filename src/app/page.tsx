@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, useScroll, useTransform, AnimatePresence, useInView } from 'framer-motion'
 import { ReactLenis } from 'lenis/react'
 import { useRouter } from 'next/navigation'
@@ -75,7 +76,7 @@ const COPY = {
         ctaPrimary: 'Acceder ahora',
         ctaSecondary: 'Crear cuenta',
         // Footer
-        copyright: '© 2026 Serendipity Bros',
+        copyright: '© 2026 Serendipity OS',
         // Modules
         modules: [
             { title: 'Finanzas', desc: 'Ingresos, gastos, liquidez y proyecciones en tiempo real.', tag: 'FIN_01', icon: 'BarChart3', size: 'large' },
@@ -132,7 +133,7 @@ const COPY = {
         ctaDesc: 'Join the organization already operating with conscious intelligence.',
         ctaPrimary: 'Access now',
         ctaSecondary: 'Create account',
-        copyright: '© 2026 Serendipity Bros',
+        copyright: '© 2026 Serendipity OS',
         modules: [
             { title: 'Finance', desc: 'Revenue, expenses, liquidity and projections in real time.', tag: 'FIN_01', icon: 'BarChart3', size: 'large' },
             { title: 'Sophia AI', desc: 'Macro-agent orchestrating specialized micro-agents.', tag: 'AI_CORE', icon: 'Brain', size: 'medium' },
@@ -188,7 +189,7 @@ const COPY = {
         ctaDesc: 'Tham gia tổ chức đã hoạt động với trí tuệ có ý thức.',
         ctaPrimary: 'Truy cập ngay',
         ctaSecondary: 'Tạo tài khoản',
-        copyright: '© 2026 Serendipity Bros',
+        copyright: '© 2026 Serendipity OS',
         modules: [
             { title: 'Tài chính', desc: 'Doanh thu, chi phí, thanh khoản và dự báo thời gian thực.', tag: 'FIN_01', icon: 'BarChart3', size: 'large' },
             { title: 'Sophia AI', desc: 'Đặc vụ macro điều phối các micro-agent chuyên biệt.', tag: 'AI_CORE', icon: 'Brain', size: 'medium' },
@@ -483,7 +484,7 @@ function AppMockup({ lang }: { lang: 'es' | 'en' | 'vn' }) {
                             <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
                                 <Shield size={13} className="text-white" />
                             </div>
-                            <span className="text-white font-black text-[12px] tracking-tight">Serendipity<span className="text-blue-500">.</span></span>
+                            <span className="text-white font-black text-[12px] tracking-tight">Serendipity OS</span>
                         </div>
                         {/* Nav */}
                         <div className="p-2 flex flex-col gap-0.5 flex-1 overflow-hidden">
@@ -689,8 +690,19 @@ export default function LandingPage() {
     const lang = (language as Lang) || 'es'
     const c = COPY[lang]
     const [climateIdx, setClimateIdx] = useState(0)
+    const [isDark, setIsDark] = useState(false)
 
-    // Theme is controlled globally by AuthControls — no force here
+    // Detectar tema activo (controlado por AuthControls vía data-theme)
+    useEffect(() => {
+        const getTheme = () => {
+            const stored = localStorage.getItem('theme')
+            return (stored || document.documentElement.getAttribute('data-theme') || 'light') === 'dark'
+        }
+        setIsDark(getTheme())
+        const observer = new MutationObserver(() => setIsDark(getTheme()))
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+        return () => observer.disconnect()
+    }, [])
 
     useEffect(() => {
         const id = setInterval(() => setClimateIdx(i => (i + 1) % 3), 3200)
@@ -712,9 +724,15 @@ export default function LandingPage() {
                 transition={{ duration: 0.5 }}
                 className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 sm:px-10 h-16 apple-blur border-b border-[var(--border)]"
             >
-                <span className="text-xl font-black tracking-tighter text-blue-600">
-                    Serendipity<span className="text-[var(--foreground)]">.</span>
-                </span>
+                <div className="relative h-9 w-40 shrink-0">
+                    <Image
+                        src={isDark ? '/dark_icon.png' : '/light_icon.png'}
+                        alt="Serendipity OS"
+                        fill
+                        className="object-contain object-left"
+                        priority
+                    />
+                </div>
 
                 <div className="hidden sm:flex items-center gap-1 text-[12px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest">
                     {c.nav.map((label, i) => (
@@ -1269,8 +1287,8 @@ export default function LandingPage() {
             {/* ── FOOTER ── */}
             <footer className="border-t border-zinc-800 bg-zinc-900 px-6 py-8">
                 <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <span className="text-[15px] font-black tracking-[-0.04em] text-white">
-                        Serendipity<span className="text-blue-500">.</span>
+                    <span className="text-[15px] font-black tracking-tighter text-white">
+                        Serendipity OS
                     </span>
                     <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-600">{c.copyright}</p>
                     <div className="flex items-center gap-6">

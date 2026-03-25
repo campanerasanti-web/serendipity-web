@@ -36,7 +36,7 @@ export default function OperacionesPage() {
         customer: '',
         product: '',
         quantity: '',
-        unit: 'Kg',
+        unit: 'SF',
         currentStationId: ''
     })
 
@@ -66,6 +66,11 @@ export default function OperacionesPage() {
         }
     }, [searchParams, router])
 
+    // QC station: the one named 'Control de Calidad' (id contains 'qc' concept – detected by name match)
+    const qcStation = stations.find(s =>
+        s.name?.toLowerCase().includes('control') || s.name?.toLowerCase().includes('calidad') || s.name?.toLowerCase().includes('quality')
+    )
+
     const handleMoveToNextStation = useCallback((orderToMove: any) => {
         if (stations.length > 0) {
             const currentIdx = stations.findIndex(s => s.id === orderToMove.currentStationId)
@@ -81,9 +86,10 @@ export default function OperacionesPage() {
             }
 
             const nextStation = stations[currentIdx + 1]
-            const isMovingToFinalStage = currentIdx + 1 === stations.length - 1
+            // Trigger QC yield check when moving INTO the QC station
+            const isMovingToQC = qcStation && nextStation?.id === qcStation.id
 
-            if (isMovingToFinalStage) {
+            if (isMovingToQC) {
                 setPendingYieldCheck(orderToMove)
             } else if (nextStation) {
                 moveToStation({ orderId: orderToMove.id, stationId: nextStation.id })
@@ -94,7 +100,7 @@ export default function OperacionesPage() {
                 })
             }
         }
-    }, [stations, moveToStation, t, addNotification, language])
+    }, [stations, qcStation, moveToStation, t, addNotification, language])
 
     const handleScanComplete = useCallback((data: string) => {
         setIsScannerOpen(false)
@@ -106,9 +112,9 @@ export default function OperacionesPage() {
         } else {
             createOrder({
                 customer: `${t('operations.batch')} ${data.substring(0, 8)}`,
-                product: 'Materia Primera Promedio',
-                quantity: Math.floor(Math.random() * 500) + 100,
-                unit: 'Kg',
+                product: language === 'es' ? 'Cuero — Rollo sin clasificar' : 'Leather — Unclassified Roll',
+                quantity: Math.floor(Math.random() * 300) + 50,
+                unit: 'SF',
                 currentStationId: stations[0]?.id
             })
             addNotification({
@@ -123,7 +129,7 @@ export default function OperacionesPage() {
         if (!pendingYieldCheck || !yieldInput) return
 
         const expected = pendingYieldCheck.quantity
-        const actual = parseInt(yieldInput)
+        const actual = parseFloat(yieldInput)
         const yieldPct = ((actual / expected) * 100).toFixed(1)
         const isCritical = actual < expected * 0.9
 
@@ -133,8 +139,7 @@ export default function OperacionesPage() {
                 title: t('operations.lowYieldAlert', { id: pendingYieldCheck.id }),
                 message: t('operations.lowYieldMessage', { 
                     pct: yieldPct, 
-                    loss: expected - actual, 
-                    unit: pendingYieldCheck.unit 
+                    loss: (expected - actual).toFixed(1)
                 })
             })
             updateStatus({ orderId: pendingYieldCheck.id, status: 'red' })
@@ -147,8 +152,9 @@ export default function OperacionesPage() {
             updateStatus({ orderId: pendingYieldCheck.id, status: 'green' })
         }
 
-        if (stations.length > 0 && pendingYieldCheck.currentStationId !== stations[stations.length - 1].id) {
-            moveToStation({ orderId: pendingYieldCheck.id, stationId: stations[stations.length - 1].id })
+        // After QC, move to QC station itself (we were previewing yield before entering it)
+        if (qcStation && pendingYieldCheck.currentStationId !== qcStation.id) {
+            moveToStation({ orderId: pendingYieldCheck.id, stationId: qcStation.id })
         }
 
         setPendingYieldCheck(null)
@@ -615,39 +621,45 @@ export default function OperacionesPage() {
                             className="bg-[var(--card)] p-6 sm:p-8 rounded-[32px] border border-[var(--border)] shadow-xl max-w-sm w-full relative max-h-[90dvh] overflow-y-auto"
                         >
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 rounded-[16px] bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 border border-blue-500/20">
+                                <div className="w-12 h-12 rounded-[16px] bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/20">
                                     <Activity size={20} strokeWidth={2} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h3 className="text-lg font-semibold text-[var(--foreground)] tracking-tight">Control de Calidad</h3>
-                                    <p className="text-[13px] font-medium text-[var(--muted-foreground)]">Cálculo de Yield</p>
+                                    <h3 className="text-lg font-semibold text-[var(--foreground)] tracking-tight">{t('operations.qcModalTitle')}</h3>
+                                    <p className="text-[13px] font-medium text-[var(--muted-foreground)]">{t('operations.qcModalSubtitle')}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-6">
                                 <div className="bg-[var(--background)] p-5 rounded-[20px] border border-[var(--border)] space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[13px] font-medium text-[var(--muted-foreground)]">Lote ID</span>
+                                        <span className="text-[13px] font-medium text-[var(--muted-foreground)]">{language === 'es' ? 'Lote ID' : 'Batch ID'}</span>
                                         <span className="text-[14px] font-semibold text-[var(--foreground)]">{pendingYieldCheck.id}</span>
                                     </div>
                                     <div className="w-full h-[1px] bg-[var(--border)]" />
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[13px] font-medium text-[var(--muted-foreground)]">SF Recibidos (Entrada)</span>
-                                        <span className="text-[15px] font-semibold text-blue-500">{pendingYieldCheck.quantity} SF</span>
+                                        <span className="text-[13px] font-medium text-[var(--muted-foreground)]">{t('operations.qcSfReceived')}</span>
+                                        <span className="text-[15px] font-semibold text-emerald-500">{pendingYieldCheck.quantity} SF</span>
+                                    </div>
+                                    <div className="w-full h-[1px] bg-[var(--border)]" />
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[13px] font-medium text-[var(--muted-foreground)]">{language === 'es' ? 'Cliente' : 'Customer'}</span>
+                                        <span className="text-[14px] font-semibold text-[var(--foreground)] truncate max-w-[160px]">{pendingYieldCheck.customer}</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[13px] font-medium text-[var(--foreground)] ml-2">Pies Cuadrados (SF) Resultantes</label>
+                                    <label className="text-[13px] font-medium text-[var(--foreground)] ml-2">{t('operations.qcSfResulting')}</label>
                                     <input
                                         type="number"
+                                        step="0.5"
                                         value={yieldInput}
                                         onChange={e => setYieldInput(e.target.value)}
-                                        placeholder="Ej. 145"
-                                        className="w-full h-14 bg-[var(--background)] border border-[var(--border)] rounded-[16px] px-4 text-base font-semibold text-[var(--foreground)] focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-center"
+                                        placeholder={t('operations.qcSfPlaceholder')}
+                                        className="w-full h-14 bg-[var(--background)] border border-[var(--border)] rounded-[16px] px-4 text-base font-semibold text-[var(--foreground)] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all text-center"
                                         autoFocus
                                     />
-                                    <p className="text-center text-[12px] text-[var(--muted-foreground)] font-medium mt-2">Sophia calculará automáticamente el Yield de operación.</p>
+                                    <p className="text-center text-[12px] text-[var(--muted-foreground)] font-medium mt-2">{t('operations.qcSfHint')}</p>
                                 </div>
 
                                 <div className="flex gap-3 pt-2">
@@ -656,14 +668,14 @@ export default function OperacionesPage() {
                                         onClick={() => { setPendingYieldCheck(null); setYieldInput(''); }}
                                         className="flex-1 h-12 rounded-[16px] font-medium hover:text-[var(--foreground)] text-[var(--muted-foreground)]"
                                     >
-                                        Cancelar
+                                        {t('common.cancel')}
                                     </Button>
                                     <Button
                                         onClick={handleYieldSubmit}
                                         disabled={!yieldInput}
-                                        className="flex-1 h-12 rounded-[16px] bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-all"
+                                        className="flex-1 h-12 rounded-[16px] bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm transition-all"
                                     >
-                                        Validar
+                                        {t('operations.qcValidate')}
                                     </Button>
                                 </div>
                             </div>
@@ -750,9 +762,9 @@ export default function OperacionesPage() {
                                             onChange={e => setCreateForm({ ...createForm, unit: e.target.value })}
                                             className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[16px] px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 appearance-none"
                                         >
+                                            <option value="SF">SF</option>
                                             <option value="Kg">Kg</option>
                                             <option value="Lbs">Lbs</option>
-                                            <option value="SF">SF</option>
                                         </select>
                                     </div>
                                 </div>

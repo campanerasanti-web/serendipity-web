@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, LucideIcon } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
 
 interface MenuItem {
     name: string
@@ -25,6 +27,25 @@ export function Sidebar({ isOpen, isDesktop, setOpen, menuItems }: SidebarProps)
     const pathname = usePathname()
     const isCompact = isDesktop && !isOpen
 
+    // Detectar el tema actual y reaccionar a cambios
+    const [isDark, setIsDark] = useState(false)
+
+    useEffect(() => {
+        const getTheme = () => {
+            const stored = localStorage.getItem('theme')
+            return (stored || document.documentElement.getAttribute('data-theme') || 'light') === 'dark'
+        }
+        setIsDark(getTheme())
+
+        // Observar cambios en el atributo data-theme del html
+        const observer = new MutationObserver(() => setIsDark(getTheme()))
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+        })
+        return () => observer.disconnect()
+    }, [])
+
     return (
         <motion.aside
             initial={false}
@@ -39,28 +60,40 @@ export function Sidebar({ isOpen, isDesktop, setOpen, menuItems }: SidebarProps)
             )}
         >
             {/* Logo area */}
-            <div className="h-24 flex items-center px-8 mb-4">
+            <div className="h-24 flex items-center px-6 mb-4">
                 <AnimatePresence mode="wait">
                     {(isOpen || !isDesktop) ? (
-                        <motion.span
-                            key="text"
+                        <motion.div
+                            key="logo-full"
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -10 }}
-                            className="text-2xl font-black tracking-tighter text-blue-600"
+                            className="relative h-10 w-44"
                         >
-                            Serendipity
-                        </motion.span>
+                            <Image
+                                src={isDark ? '/dark_icon.png' : '/light_icon.png'}
+                                alt="Serendipity OS"
+                                fill
+                                className="object-contain object-left"
+                                priority
+                            />
+                        </motion.div>
                     ) : (
-                        <motion.span
-                            key="dot"
+                        <motion.div
+                            key="logo-compact"
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0 }}
-                            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-black text-sm"
+                            className="relative w-10 h-10"
                         >
-                            S
-                        </motion.span>
+                            <Image
+                                src={isDark ? '/dark_icon.png' : '/light_icon.png'}
+                                alt="S"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </motion.div>
                     )}
                 </AnimatePresence>
             </div>

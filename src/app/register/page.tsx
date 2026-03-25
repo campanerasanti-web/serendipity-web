@@ -284,7 +284,7 @@ export default function RegisterPage({ forcedAdmin }: { forcedAdmin?: boolean })
 
                 {/* Footer Brand */}
                 <div className="absolute bottom-12 left-12 lg:left-20 text-white/40 text-[10px] font-bold uppercase tracking-[0.3em]">
-                    Serendipity Bros © 2026
+                    Serendipity OS © 2026
                 </div>
             </motion.div>
 
