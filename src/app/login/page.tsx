@@ -327,7 +327,7 @@ export default function LoginPage() {
                                                 {t('auth.register') || 'Regístrate'}
                                             </Link>
                                         </p>
-                                        <Link href="/">
+                                        <Link href={process.env.NEXT_PUBLIC_LANDING_URL || "/"}>
                                             <Button variant="ghost" size="sm" className="!rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted-foreground)]">
                                                 <ChevronLeft size={14} className="mr-1" /> {t('common.backToStart') || 'Volver al inicio'}
                                             </Button>
